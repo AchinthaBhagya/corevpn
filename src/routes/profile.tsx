@@ -23,6 +23,9 @@ function ProfilePage() {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
 
+  // Re-fetch role/profile on mount so newly-granted admin shows up without re-login
+  useEffect(() => { if (user) void refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user?.id]);
+
   useEffect(() => { setDisplayName(profile?.display_name ?? ""); }, [profile]);
 
   const save = async () => {
