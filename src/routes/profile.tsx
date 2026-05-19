@@ -23,6 +23,9 @@ function ProfilePage() {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
 
+  // Re-fetch role/profile on mount so newly-granted admin shows up without re-login
+  useEffect(() => { if (user) void refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user?.id]);
+
   useEffect(() => { setDisplayName(profile?.display_name ?? ""); }, [profile]);
 
   const save = async () => {
@@ -41,7 +44,14 @@ function ProfilePage() {
       <div className="rounded-3xl border border-border/60 bg-card p-8 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold">Your profile</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-3xl font-bold">Your profile</h1>
+              {isAdmin && (
+                <span className="inline-flex items-center rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-warning-foreground">
+                  Admin
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-sm text-muted-foreground">Manage your coreVPN account</p>
           </div>
           <div className="flex gap-2">
