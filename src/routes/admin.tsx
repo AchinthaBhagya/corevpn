@@ -256,7 +256,7 @@ function AdminPage() {
                   {logs.map((l) => (
                     <tr key={l.id} className="border-t border-border/60">
                       <td className="p-3 text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()}</td>
-                      <td className="p-3 font-mono text-xs">{l.user_email ?? "—"}</td>
+                      <td className="p-3 font-mono text-xs">{l.user_email ?? users.find((u) => u.id === l.user_id)?.email ?? "—"}</td>
                       <td className="p-3"><Badge variant="secondary">{l.action}</Badge></td>
                       <td className="p-3 text-xs">{l.config_label ?? "—"}</td>
                     </tr>
