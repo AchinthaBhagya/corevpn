@@ -39,7 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Log login once per session start
     void supabase.from("access_logs").insert({
       user_id: uid,
-      user_email: email ?? null,
       action: "session_active",
     });
   };
