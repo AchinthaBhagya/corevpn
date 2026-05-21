@@ -33,7 +33,7 @@ type Config = {
   created_at: string;
 };
 type LogRow = {
-  id: string; user_email: string | null; action: string;
+  id: string; user_id: string | null; user_email: string | null; action: string;
   config_label: string | null; created_at: string;
 };
 type UserRow = { id: string; email: string; display_name: string | null; is_premium: boolean; created_at: string };
