@@ -71,7 +71,6 @@ function Configs() {
       toast.success(`Copied: ${c.config_name}`);
       void supabase.from("access_logs").insert({
         user_id: user!.id,
-        user_email: user!.email,
         action: "config_copied",
         config_id: c.id,
         config_label: `${c.isp} > ${c.package_name} > ${c.config_name}`,

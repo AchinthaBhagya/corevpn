@@ -33,7 +33,7 @@ type Config = {
   created_at: string;
 };
 type LogRow = {
-  id: string; user_email: string | null; action: string;
+  id: string; user_id: string | null; user_email: string | null; action: string;
   config_label: string | null; created_at: string;
 };
 type UserRow = { id: string; email: string; display_name: string | null; is_premium: boolean; created_at: string };
@@ -256,7 +256,7 @@ function AdminPage() {
                   {logs.map((l) => (
                     <tr key={l.id} className="border-t border-border/60">
                       <td className="p-3 text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()}</td>
-                      <td className="p-3 font-mono text-xs">{l.user_email ?? "—"}</td>
+                      <td className="p-3 font-mono text-xs">{l.user_email ?? users.find((u) => u.id === l.user_id)?.email ?? "—"}</td>
                       <td className="p-3"><Badge variant="secondary">{l.action}</Badge></td>
                       <td className="p-3 text-xs">{l.config_label ?? "—"}</td>
                     </tr>
