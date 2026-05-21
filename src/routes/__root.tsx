@@ -61,8 +61,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ace9612a-d3b8-424d-8a24-c20753600194" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ace9612a-d3b8-424d-8a24-c20753600194" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "monetag", content: "a85a55a0694e3d3c7bc3d25d94db0d1d" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    scripts: [
+      {
+        type: "text/javascript",
+        children: `(function(s){s.dataset.zone='10980744',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
