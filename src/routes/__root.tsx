@@ -9,6 +9,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdblockGuard } from "@/components/AdblockGuard";
+import { MonetagLoader } from "@/components/MonetagLoader";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -97,6 +98,7 @@ function RootInner() {
       <Footer />
       <Toaster richColors position="top-right" />
       <AdblockGuard />
+      <MonetagLoader />
     </div>
   );
 }
