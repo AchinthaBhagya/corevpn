@@ -65,12 +65,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "monetag", content: "a85a55a0694e3d3c7bc3d25d94db0d1d" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
-    scripts: [
-      {
-        type: "text/javascript",
-        children: `(function(s){s.dataset.zone='10980744',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-      },
-    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
