@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AdblockGuard } from "@/components/AdblockGuard";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -101,6 +102,7 @@ function RootInner() {
       <main className="flex-1"><Outlet /></main>
       <Footer />
       <Toaster richColors position="top-right" />
+      <AdblockGuard />
     </div>
   );
 }
