@@ -24,7 +24,7 @@ export function Header() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate({ to: "/" });
+    navigate({ to: "/", replace: true });
   };
 
   return (
