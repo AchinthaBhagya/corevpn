@@ -58,7 +58,7 @@ function ProfilePage() {
             {isAdmin && (
               <Button variant="outline" asChild><Link to="/admin">Admin Panel</Link></Button>
             )}
-            <Button variant="outline" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
+            <Button variant="outline" onClick={async () => { await signOut(); navigate({ to: "/", replace: true }); }}>
               <LogOut className="mr-1.5 h-4 w-4" />Sign out
             </Button>
           </div>
