@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 type Profile = {
@@ -23,6 +24,7 @@ type AuthCtx = {
 const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -72,9 +74,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Stop in-flight queries before 401s land, then drop cached protected data.
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setProfile(null);
     setIsAdmin(false);
+    setSession(null);
+    setUser(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // Session may already be gone (missing/expired) — safe to ignore.
+      console.warn("signOut:", e);
+    }
   };
 
   return (
