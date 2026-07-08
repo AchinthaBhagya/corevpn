@@ -74,9 +74,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Stop in-flight queries before 401s land, then drop cached protected data.
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setProfile(null);
     setIsAdmin(false);
+    setSession(null);
+    setUser(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // Session may already be gone (missing/expired) — safe to ignore.
+      console.warn("signOut:", e);
+    }
   };
 
   return (
