@@ -69,7 +69,7 @@ export function AdblockGuard() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, []);
+  }, [isAdmin, loading]);
 
   if (!blocked) return null;
 
