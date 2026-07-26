@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { ShieldAlert } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export function AdblockGuard() {
   const [blocked, setBlocked] = useState(false);
+  const { isAdmin, loading } = useAuth();
 
   useEffect(() => {
     let cancelled = false;
+    // Admins are exempt from the adblock wall
+    if (loading || isAdmin) {
+      setBlocked(false);
+      return;
+    }
 
     const check = async () => {
       let detected = false;
@@ -62,7 +69,7 @@ export function AdblockGuard() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, []);
+  }, [isAdmin, loading]);
 
   if (!blocked) return null;
 
