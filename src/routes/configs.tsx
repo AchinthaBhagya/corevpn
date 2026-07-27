@@ -26,11 +26,13 @@ type Config = {
 };
 
 function Configs() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, subscription, hasPlanAccess } = useAuth();
+  const unlocked = Boolean(profile?.is_premium) || hasPlanAccess;
   const [configs, setConfigs] = useState<Config[]>([]);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [ispFilter, setIspFilter] = useState<string>("all");
+
 
   useEffect(() => {
     if (!user) return;
