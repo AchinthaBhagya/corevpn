@@ -14,7 +14,9 @@ const nav = [
   { to: "/info", label: "Info" },
   { to: "/setup", label: "Setup" },
   { to: "/configs", label: "Configs" },
+  { to: "/plans", label: "Plans" },
 ] as const;
+
 
 export function Header() {
   const { theme, toggle } = useTheme();
