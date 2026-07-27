@@ -278,7 +278,66 @@ function AdminPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="subs" className="mt-4">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="p-3">User</th><th className="p-3">Plan</th>
+                    <th className="p-3">Price</th><th className="p-3">Pay by</th>
+                    <th className="p-3">Period end</th><th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subs.length === 0 && (
+                    <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No subscriptions yet.</td></tr>
+                  )}
+                  {subs.map((s) => {
+                    const st = subscriptionStatus(s);
+                    return (
+                      <tr key={s.id} className="border-t border-border/60">
+                        <td className="p-3 font-mono text-xs">{users.find((u) => u.id === s.user_id)?.email ?? "—"}</td>
+                        <td className="p-3 capitalize">{s.plan_tier}</td>
+                        <td className="p-3">{formatLKR(s.price_lkr)}</td>
+                        <td className="p-3 text-xs text-muted-foreground">{new Date(s.pay_by_date).toLocaleDateString()}</td>
+                        <td className="p-3 text-xs text-muted-foreground">{s.period_end ? new Date(s.period_end).toLocaleDateString() : "—"}</td>
+                        <td className="p-3">
+                          <Badge
+                            className={
+                              st.tone === "active" ? "bg-primary text-primary-foreground"
+                                : st.tone === "grace" ? "bg-warning text-warning-foreground"
+                                  : "bg-destructive text-destructive-foreground"
+                            }
+                          >
+                            {st.label}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button size="sm" variant={s.is_paid ? "outline" : "default"} onClick={() => markPaid(s, !s.is_paid)}>
+                              {s.is_paid ? "Mark unpaid" : "Mark paid"}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => extendDeadline(s)}>Extend</Button>
+                            {!s.cancelled && (
+                              <Button size="sm" variant="ghost" onClick={() => disconnectSub(s)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
         <TabsContent value="logs" className="mt-4">
+
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
