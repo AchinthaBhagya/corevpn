@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear();
     setProfile(null);
     setIsAdmin(false);
+    setSubscription(null);
     setSession(null);
     setUser(null);
     try {
@@ -104,8 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const hasPlanAccess = subscriptionActive(subscription);
+
   return (
-    <Ctx.Provider value={{ user, session, profile, isAdmin, loading, signOut, refresh }}>
+    <Ctx.Provider value={{ user, session, profile, isAdmin, subscription, hasPlanAccess, loading, signOut, refresh }}>
+
       {children}
     </Ctx.Provider>
   );
