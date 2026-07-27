@@ -100,6 +100,45 @@ export type Database = {
         }
         Relationships: []
       }
+      plans: {
+        Row: {
+          created_at: string
+          data_gb: number | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_lkr: number
+          sort_order: number
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_gb?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_lkr: number
+          sort_order?: number
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_gb?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_lkr?: number
+          sort_order?: number
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -127,6 +166,51 @@ export type Database = {
           id?: string
           is_premium?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          admin_note: string | null
+          cancelled: boolean
+          created_at: string
+          id: string
+          is_paid: boolean
+          paid_at: string | null
+          pay_by_date: string
+          period_end: string | null
+          plan_tier: Database["public"]["Enums"]["plan_tier"]
+          price_lkr: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          cancelled?: boolean
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          paid_at?: string | null
+          pay_by_date: string
+          period_end?: string | null
+          plan_tier: Database["public"]["Enums"]["plan_tier"]
+          price_lkr: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          cancelled?: boolean
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          paid_at?: string | null
+          pay_by_date?: string
+          period_end?: string | null
+          plan_tier?: Database["public"]["Enums"]["plan_tier"]
+          price_lkr?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -166,6 +250,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      plan_tier: "basic" | "standard" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -294,6 +379,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      plan_tier: ["basic", "standard", "premium"],
     },
   },
 } as const

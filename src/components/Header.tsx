@@ -14,7 +14,9 @@ const nav = [
   { to: "/info", label: "Info" },
   { to: "/setup", label: "Setup" },
   { to: "/configs", label: "Configs" },
+  { to: "/plans", label: "Plans" },
 ] as const;
+
 
 export function Header() {
   const { theme, toggle } = useTheme();
@@ -92,7 +94,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild><Link to="/auth">Login</Link></Button>
+              <Button variant="ghost" size="sm" asChild><Link to="/auth" search={{ mode: "login" }}>Login</Link></Button>
               <Button size="sm" asChild className="bg-gradient-primary text-primary-foreground shadow-glow">
                 <Link to="/auth" search={{ mode: "register" }}>Register</Link>
               </Button>
@@ -119,7 +121,7 @@ export function Header() {
             {!user && (
               <div className="mt-2 flex gap-2 border-t border-border/60 pt-2">
                 <Button variant="outline" size="sm" className="flex-1" asChild>
-                  <Link to="/auth" onClick={() => setOpen(false)}>Login</Link>
+                  <Link to="/auth" search={{ mode: "login" }} onClick={() => setOpen(false)}>Login</Link>
                 </Button>
                 <Button size="sm" className="flex-1 bg-gradient-primary text-primary-foreground" asChild>
                   <Link to="/auth" search={{ mode: "register" }} onClick={() => setOpen(false)}>Register</Link>

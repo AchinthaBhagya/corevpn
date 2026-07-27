@@ -83,15 +83,16 @@ function Home() {
             <div className="rounded-2xl border border-border/60 bg-background/60 p-6">
               <div className="text-sm text-muted-foreground">Single payment</div>
               <div className="mt-1 flex items-baseline gap-1">
-                <span className="font-display text-5xl font-bold">LKR 990</span>
-                <span className="text-muted-foreground">/ lifetime</span>
+                <span className="font-display text-5xl font-bold">LKR 200</span>
+                <span className="text-muted-foreground">/ month from</span>
               </div>
               <Button size="lg" className="mt-6 w-full bg-gradient-primary text-primary-foreground shadow-glow" asChild>
-                <Link to="/profile">Get Paid Plan</Link>
+                <Link to="/plans">Get Paid Plan</Link>
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                Contact admin via Profile page to activate Premium.
+                Basic 100 GB · Standard 200 GB · Premium unlimited — start now, pay within your deadline.
               </p>
+
             </div>
           </div>
         </div>

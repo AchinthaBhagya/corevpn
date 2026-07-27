@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConfigsRouteImport } from './routes/configs'
 import { Route as InfoRouteImport } from './routes/info'
+import { Route as PlansRouteImport } from './routes/plans'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SetupRouteImport } from './routes/setup'
 
@@ -42,6 +43,11 @@ const InfoRoute = InfoRouteImport.update({
   path: '/info',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/configs': typeof ConfigsRoute
   '/info': typeof InfoRoute
+  '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/configs': typeof ConfigsRoute
   '/info': typeof InfoRoute
+  '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/configs': typeof ConfigsRoute
   '/info': typeof InfoRoute
+  '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
 }
@@ -89,10 +98,19 @@ export interface FileRouteTypes {
     | '/auth'
     | '/configs'
     | '/info'
+    | '/plans'
     | '/profile'
     | '/setup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/auth' | '/configs' | '/info' | '/profile' | '/setup'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/configs'
+    | '/info'
+    | '/plans'
+    | '/profile'
+    | '/setup'
   id:
     | '__root__'
     | '/'
@@ -100,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/configs'
     | '/info'
+    | '/plans'
     | '/profile'
     | '/setup'
   fileRoutesById: FileRoutesById
@@ -110,6 +129,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConfigsRoute: typeof ConfigsRoute
   InfoRoute: typeof InfoRoute
+  PlansRoute: typeof PlansRoute
   ProfileRoute: typeof ProfileRoute
   SetupRoute: typeof SetupRoute
 }
@@ -151,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -174,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConfigsRoute: ConfigsRoute,
   InfoRoute: InfoRoute,
+  PlansRoute: PlansRoute,
   ProfileRoute: ProfileRoute,
   SetupRoute: SetupRoute,
 }

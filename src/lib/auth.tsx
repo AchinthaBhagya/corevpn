@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { subscriptionActive, type Subscription } from "@/lib/plans";
 
 type Profile = {
   id: string;
@@ -16,6 +17,8 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  subscription: Subscription | null;
+  hasPlanAccess: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -29,21 +32,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadExtras = async (uid: string, email: string | undefined) => {
-    const [{ data: prof }, { data: roles }] = await Promise.all([
+    const [{ data: prof }, { data: roles }, { data: subs }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
+      supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", uid)
+        .eq("cancelled", false)
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
     setProfile((prof as Profile | null) ?? null);
     setIsAdmin((roles ?? []).some((r: { role: string }) => r.role === "admin"));
+    setSubscription(((subs ?? [])[0] as Subscription | undefined) ?? null);
     // Log login once per session start
     void supabase.from("access_logs").insert({
       user_id: uid,
       action: "session_active",
     });
   };
+
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
@@ -54,7 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setSubscription(null);
       }
+
     });
 
     supabase.auth.getSession().then(({ data }) => {
@@ -79,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear();
     setProfile(null);
     setIsAdmin(false);
+    setSubscription(null);
     setSession(null);
     setUser(null);
     try {
@@ -89,8 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const hasPlanAccess = subscriptionActive(subscription);
+
   return (
-    <Ctx.Provider value={{ user, session, profile, isAdmin, loading, signOut, refresh }}>
+    <Ctx.Provider value={{ user, session, profile, isAdmin, subscription, hasPlanAccess, loading, signOut, refresh }}>
+
       {children}
     </Ctx.Provider>
   );

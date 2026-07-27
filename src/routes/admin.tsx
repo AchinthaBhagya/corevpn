@@ -14,6 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { formatLKR, subscriptionStatus, type Subscription } from "@/lib/plans";
+
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -37,6 +39,8 @@ type LogRow = {
   config_label: string | null; created_at: string;
 };
 type UserRow = { id: string; email: string; display_name: string | null; is_premium: boolean; created_at: string };
+type SubRow = Subscription;
+
 
 const empty = {
   isp: "Dialog", package_name: "", config_name: "", config_data: "",
@@ -49,6 +53,7 @@ function AdminPage() {
   const [configs, setConfigs] = useState<Config[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [subs, setSubs] = useState<SubRow[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
@@ -58,15 +63,47 @@ function AdminPage() {
   }, [user, isAdmin, loading, navigate]);
 
   const load = async () => {
-    const [c, l, u] = await Promise.all([
+    const [c, l, u, s] = await Promise.all([
       supabase.from("configs").select("*").order("created_at", { ascending: false }),
       supabase.from("access_logs").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("profiles").select("id,email,display_name,is_premium,created_at").order("created_at", { ascending: false }),
+      supabase.from("subscriptions").select("*").order("created_at", { ascending: false }),
     ]);
     if (c.data) setConfigs(c.data as Config[]);
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
+    if (s.data) setSubs(s.data as SubRow[]);
   };
+
+  const markPaid = async (s: SubRow, paid: boolean) => {
+    const { error } = await supabase.from("subscriptions").update({
+      is_paid: paid,
+      paid_at: paid ? new Date().toISOString() : null,
+      period_end: paid ? new Date(Date.now() + 30 * 86_400_000).toISOString() : s.period_end,
+    }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success(paid ? "Marked as paid — 30 days added" : "Marked as unpaid"); void load(); }
+  };
+
+  const extendDeadline = async (s: SubRow) => {
+    const input = prompt("Extend payment deadline by how many days?", "3");
+    const d = Number(input);
+    if (!d || d <= 0) return;
+    const base = Math.max(Date.now(), new Date(s.pay_by_date).getTime());
+    const { error } = await supabase.from("subscriptions")
+      .update({ pay_by_date: new Date(base + d * 86_400_000).toISOString() }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deadline extended"); void load(); }
+  };
+
+  const disconnectSub = async (s: SubRow) => {
+    if (!confirm("Disconnect this subscription now?")) return;
+    const { error } = await supabase.from("subscriptions")
+      .update({ cancelled: true }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Subscription disconnected"); void load(); }
+  };
+
   useEffect(() => { if (isAdmin) void load(); }, [isAdmin]);
 
   const openNew = () => {
@@ -163,7 +200,9 @@ function AdminPage() {
         <TabsList>
           <TabsTrigger value="configs">Configs</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="subs">Subscriptions</TabsTrigger>
           <TabsTrigger value="logs">Activity Logs</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="configs" className="mt-4">
@@ -239,7 +278,66 @@ function AdminPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="subs" className="mt-4">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="p-3">User</th><th className="p-3">Plan</th>
+                    <th className="p-3">Price</th><th className="p-3">Pay by</th>
+                    <th className="p-3">Period end</th><th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subs.length === 0 && (
+                    <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No subscriptions yet.</td></tr>
+                  )}
+                  {subs.map((s) => {
+                    const st = subscriptionStatus(s);
+                    return (
+                      <tr key={s.id} className="border-t border-border/60">
+                        <td className="p-3 font-mono text-xs">{users.find((u) => u.id === s.user_id)?.email ?? "—"}</td>
+                        <td className="p-3 capitalize">{s.plan_tier}</td>
+                        <td className="p-3">{formatLKR(s.price_lkr)}</td>
+                        <td className="p-3 text-xs text-muted-foreground">{new Date(s.pay_by_date).toLocaleDateString()}</td>
+                        <td className="p-3 text-xs text-muted-foreground">{s.period_end ? new Date(s.period_end).toLocaleDateString() : "—"}</td>
+                        <td className="p-3">
+                          <Badge
+                            className={
+                              st.tone === "active" ? "bg-primary text-primary-foreground"
+                                : st.tone === "grace" ? "bg-warning text-warning-foreground"
+                                  : "bg-destructive text-destructive-foreground"
+                            }
+                          >
+                            {st.label}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button size="sm" variant={s.is_paid ? "outline" : "default"} onClick={() => markPaid(s, !s.is_paid)}>
+                              {s.is_paid ? "Mark unpaid" : "Mark paid"}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => extendDeadline(s)}>Extend</Button>
+                            {!s.cancelled && (
+                              <Button size="sm" variant="ghost" onClick={() => disconnectSub(s)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
         <TabsContent value="logs" className="mt-4">
+
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
