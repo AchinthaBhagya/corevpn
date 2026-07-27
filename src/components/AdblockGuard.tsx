@@ -52,13 +52,12 @@ export function AdblockGuard() {
         }
       }
 
-      // Method 3: monetag script presence
+      // Method 3: sandboxed monetag frame presence
       if (!detected) {
-        const monetagLoaded = !!document.querySelector(
-          'script[src*="al5sm.com"]',
-        );
+        const monetagLoaded = !!document.getElementById("monetag-sandbox");
         if (!monetagLoaded) detected = true;
       }
+
 
       if (!cancelled) setBlocked(detected);
     };
