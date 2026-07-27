@@ -100,7 +100,7 @@ function Configs() {
           You need to be signed in to view and download VLESS configs. It's free — registration takes 10 seconds.
         </p>
         <div className="mt-8 flex justify-center gap-3">
-          <Button asChild variant="outline"><Link to="/auth">Login</Link></Button>
+          <Button asChild variant="outline"><Link to="/auth" search={{ mode: "login" }}>Login</Link></Button>
           <Button asChild className="bg-gradient-primary text-primary-foreground shadow-glow">
             <Link to="/auth" search={{ mode: "register" }}>Register free</Link>
           </Button>

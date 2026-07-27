@@ -20,7 +20,7 @@ function ProfilePage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) navigate({ to: "/auth", search: { mode: "login" } });
   }, [user, loading, navigate]);
 
   // Re-fetch role/profile on mount so newly-granted admin shows up without re-login
