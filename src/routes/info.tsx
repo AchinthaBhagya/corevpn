@@ -36,7 +36,7 @@ function Info() {
         <h2 className="font-display text-2xl font-bold">Supported apps</h2>
         <p className="mt-2 text-sm text-muted-foreground">VLESS configs from coreVPN work in any modern V2Ray-compatible client.</p>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {["v2rayNG (Android)","NekoBox (Android)","Streisand (iOS)","V2Box (iOS)","Hiddify (Desktop)","Nekoray (Desktop)","Clash Meta","sing-box"].map((a) => (
+          {["v2rayNG (Android)","NekoBox (Android)","Streisand (iOS)","V2Box (iOS)","Hiddify (Desktop)","NetMon (Desktop)","Clash Meta","sing-box"].map((a) => (
             <div key={a} className="rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-center text-sm font-medium">{a}</div>
           ))}
         </div>
