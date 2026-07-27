@@ -53,6 +53,7 @@ function AdminPage() {
   const [configs, setConfigs] = useState<Config[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [subs, setSubs] = useState<SubRow[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
@@ -62,15 +63,47 @@ function AdminPage() {
   }, [user, isAdmin, loading, navigate]);
 
   const load = async () => {
-    const [c, l, u] = await Promise.all([
+    const [c, l, u, s] = await Promise.all([
       supabase.from("configs").select("*").order("created_at", { ascending: false }),
       supabase.from("access_logs").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("profiles").select("id,email,display_name,is_premium,created_at").order("created_at", { ascending: false }),
+      supabase.from("subscriptions").select("*").order("created_at", { ascending: false }),
     ]);
     if (c.data) setConfigs(c.data as Config[]);
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
+    if (s.data) setSubs(s.data as SubRow[]);
   };
+
+  const markPaid = async (s: SubRow, paid: boolean) => {
+    const { error } = await supabase.from("subscriptions").update({
+      is_paid: paid,
+      paid_at: paid ? new Date().toISOString() : null,
+      period_end: paid ? new Date(Date.now() + 30 * 86_400_000).toISOString() : s.period_end,
+    }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success(paid ? "Marked as paid — 30 days added" : "Marked as unpaid"); void load(); }
+  };
+
+  const extendDeadline = async (s: SubRow) => {
+    const input = prompt("Extend payment deadline by how many days?", "3");
+    const d = Number(input);
+    if (!d || d <= 0) return;
+    const base = Math.max(Date.now(), new Date(s.pay_by_date).getTime());
+    const { error } = await supabase.from("subscriptions")
+      .update({ pay_by_date: new Date(base + d * 86_400_000).toISOString() }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deadline extended"); void load(); }
+  };
+
+  const disconnectSub = async (s: SubRow) => {
+    if (!confirm("Disconnect this subscription now?")) return;
+    const { error } = await supabase.from("subscriptions")
+      .update({ cancelled: true }).eq("id", s.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Subscription disconnected"); void load(); }
+  };
+
   useEffect(() => { if (isAdmin) void load(); }, [isAdmin]);
 
   const openNew = () => {
