@@ -107,15 +107,39 @@ function Configs() {
     );
   }
 
+  const status = subscriptionStatus(subscription);
+
   return (
     <div className="container mx-auto px-4 py-12">
+      {!profile?.is_premium && (
+        <div className={`mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4 ${status.tone === "grace" ? "border-warning/50 bg-warning/10" : status.tone === "active" ? "border-primary/40 bg-primary/5" : "border-destructive/40 bg-destructive/5"}`}>
+          <div className="text-sm">
+            <span className="font-semibold">{status.label}</span>
+            {subscription && !subscription.is_paid && status.tone === "grace" && (
+              <span className="ml-2 text-muted-foreground">
+                Pay LKR {subscription.price_lkr} before {new Date(subscription.pay_by_date).toLocaleDateString()} ({daysLeft(subscription.pay_by_date)} day(s) left) or your configs disconnect automatically.
+              </span>
+            )}
+            {subscription && !subscription.is_paid && status.tone === "expired" && (
+              <span className="ml-2 text-muted-foreground">Payment deadline passed — premium configs are disconnected.</span>
+            )}
+            {!subscription && (
+              <span className="ml-2 text-muted-foreground">Start a monthly plan to unlock premium configs — pay later within your deadline.</span>
+            )}
+          </div>
+          <Button size="sm" asChild className="bg-gradient-primary text-primary-foreground">
+            <Link to="/plans">{subscription ? "Manage plan" : "View plans"}</Link>
+          </Button>
+        </div>
+      )}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="font-display text-3xl font-bold md:text-4xl">All Configs</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} configurations available {profile?.is_premium && <span className="ml-1 text-warning-foreground">• Premium unlocked</span>}
+            {filtered.length} configurations available {unlocked && <span className="ml-1 text-warning-foreground">• Premium unlocked</span>}
           </p>
         </div>
+
         <div className="flex w-full gap-2 sm:w-auto">
           <div className="relative flex-1 sm:w-64">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
