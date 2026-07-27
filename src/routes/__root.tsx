@@ -97,7 +97,6 @@ function RootInner() {
       <main className="flex-1"><Outlet /></main>
       <Footer />
       <Toaster richColors position="top-right" />
-      <AdblockGuard />
 
       <MonetagLoader />
     </div>
