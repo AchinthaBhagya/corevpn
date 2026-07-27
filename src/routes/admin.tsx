@@ -200,7 +200,9 @@ function AdminPage() {
         <TabsList>
           <TabsTrigger value="configs">Configs</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="subs">Subscriptions</TabsTrigger>
           <TabsTrigger value="logs">Activity Logs</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="configs" className="mt-4">
