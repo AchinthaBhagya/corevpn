@@ -64,10 +64,11 @@ function Configs() {
   }, [filtered]);
 
   const handleCopy = async (c: Config) => {
-    if (c.requires_premium && !profile?.is_premium) {
-      toast.error("This is a premium-only config. Upgrade to coreVPN Pro to unlock it.");
+    if (c.requires_premium && !unlocked) {
+      toast.error("This config needs an active plan. Pick a monthly plan to unlock it.");
       return;
     }
+
     try {
       await navigator.clipboard.writeText(c.config_data);
       toast.success(`Copied: ${c.config_name}`);
