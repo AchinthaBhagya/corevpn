@@ -98,6 +98,7 @@ function RootInner() {
       <Footer />
       <Toaster richColors position="top-right" />
       <AdblockGuard />
+
       <MonetagLoader />
     </div>
   );
