@@ -37,6 +37,8 @@ type LogRow = {
   config_label: string | null; created_at: string;
 };
 type UserRow = { id: string; email: string; display_name: string | null; is_premium: boolean; created_at: string };
+type SubRow = Subscription;
+
 
 const empty = {
   isp: "Dialog", package_name: "", config_name: "", config_data: "",
