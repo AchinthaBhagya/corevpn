@@ -67,7 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setSubscription(null);
       }
+
     });
 
     supabase.auth.getSession().then(({ data }) => {
