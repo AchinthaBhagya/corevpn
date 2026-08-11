@@ -37,6 +37,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
+  const notifySignup = useServerFn(notifyRegistration);
 
   useEffect(() => {
     if (user) navigate({ to: "/configs" });
@@ -51,6 +52,10 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user?.email) {
+      void notifySignup({ data: { email: u.user.email, provider: "google" } });
+    }
     toast.success("Signed in!");
     navigate({ to: "/configs" });
   };
@@ -70,6 +75,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        void notifySignup({ data: { email: parsed.email, displayName: parsed.displayName, provider: "email" } });
         toast.success("Account created! Check your inbox to verify your email.");
       } else {
         const parsed = loginSchema.parse({ email, password });
