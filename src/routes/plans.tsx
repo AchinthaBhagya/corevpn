@@ -40,6 +40,8 @@ const perks: Record<string, string[]> = {
 
 function PlansPage() {
   const { user, subscription, hasPlanAccess, refresh, loading } = useAuth();
+  const notifyOrder = useServerFn(notifyPlanOrder);
+
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selected, setSelected] = useState<Plan | null>(null);

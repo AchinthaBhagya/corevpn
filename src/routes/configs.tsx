@@ -31,6 +31,8 @@ type Config = {
 
 function Configs() {
   const { user, profile, loading, subscription, hasPlanAccess } = useAuth();
+  const notifyDownload = useServerFn(notifyConfigDownload);
+
   const unlocked = Boolean(profile?.is_premium) || hasPlanAccess;
   const [configs, setConfigs] = useState<Config[]>([]);
   const [busy, setBusy] = useState(false);
