@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Shield, Mail, Lock, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { notifyRegistration } from "@/lib/discord.functions";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +37,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
+  const notifySignup = useServerFn(notifyRegistration);
 
   useEffect(() => {
     if (user) navigate({ to: "/configs" });
@@ -49,6 +52,10 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user?.email) {
+      void notifySignup({ data: { email: u.user.email, provider: "google" } });
+    }
     toast.success("Signed in!");
     navigate({ to: "/configs" });
   };
@@ -68,6 +75,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        void notifySignup({ data: { email: parsed.email, displayName: parsed.displayName, provider: "email" } });
         toast.success("Account created! Check your inbox to verify your email.");
       } else {
         const parsed = loginSchema.parse({ email, password });
