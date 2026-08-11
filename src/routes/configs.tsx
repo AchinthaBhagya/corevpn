@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Copy, Lock, Search, Shield, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { notifyConfigDownload } from "@/lib/discord.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +82,7 @@ function Configs() {
         config_id: c.id,
         config_label: `${c.isp} > ${c.package_name} > ${c.config_name}`,
       });
+      void notifyDownload({ data: { configId: c.id } });
     } catch {
       toast.error("Couldn't copy to clipboard");
     }

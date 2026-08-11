@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, Crown, Clock, Zap, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { notifyPlanOrder } from "@/lib/discord.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -57,13 +59,13 @@ function PlansPage() {
     const payBy = new Date(Date.now() + d * 86_400_000);
     const periodEnd = new Date(Date.now() + 30 * 86_400_000);
     setBusy(true);
-    const { error } = await supabase.from("subscriptions").insert({
+    const { data: inserted, error } = await supabase.from("subscriptions").insert({
       user_id: user.id,
       plan_tier: selected.tier,
       price_lkr: selected.price_lkr,
       pay_by_date: payBy.toISOString(),
       period_end: periodEnd.toISOString(),
-    });
+    }).select("id").single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     void supabase.from("access_logs").insert({
@@ -71,6 +73,7 @@ function PlansPage() {
       action: "plan_started",
       config_label: `${selected.name} • ${formatLKR(selected.price_lkr)} • pay by ${payBy.toLocaleDateString()}`,
     });
+    if (inserted?.id) void notifyOrder({ data: { subscriptionId: inserted.id } });
     toast.success(`${selected.name} activated — please pay before ${payBy.toLocaleDateString()}`);
     setSelected(null);
     await refresh();
