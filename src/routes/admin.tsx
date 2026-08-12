@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Activity, Database, Users, Shield, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Activity, Database, Users, Shield, X, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
-import { notifyPaymentConfirmed } from "@/lib/discord.functions";
+import { notifyPaymentConfirmed, testDiscordWebhook } from "@/lib/discord.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,8 @@ function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const notifyPayment = useServerFn(notifyPaymentConfirmed);
+  const testWebhook = useServerFn(testDiscordWebhook);
+  const [testing, setTesting] = useState<string | null>(null);
   const [configs, setConfigs] = useState<Config[]>([]);
 
   const [logs, setLogs] = useState<LogRow[]>([]);
@@ -78,6 +80,19 @@ function AdminPage() {
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
     if (s.data) setSubs(s.data as SubRow[]);
+  };
+
+  const runWebhookTest = async (channel: "user" | "config" | "order") => {
+    setTesting(channel);
+    try {
+      const res = await testWebhook({ data: { channel } });
+      if (res.ok) toast.success(`${channel} webhook: ${res.message}`);
+      else toast.error(`${channel} webhook: ${res.message}`);
+    } catch {
+      toast.error("Webhook test failed");
+    } finally {
+      setTesting(null);
+    }
   };
 
   const markPaid = async (s: SubRow, paid: boolean) => {
@@ -206,6 +221,35 @@ function AdminPage() {
           </div>
         ))}
       </div>
+
+      <div className="mt-6 rounded-2xl border border-border/60 bg-card p-5 shadow-card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="font-display text-sm font-bold">Discord webhooks</div>
+            <p className="text-xs text-muted-foreground">Send a test message to verify each channel.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {([
+              { key: "user", label: "Test user logs" },
+              { key: "config", label: "Test config logs" },
+              { key: "order", label: "Test order logs" },
+            ] as const).map((c) => (
+              <Button
+                key={c.key}
+                size="sm"
+                variant="outline"
+                disabled={testing !== null}
+                onClick={() => void runWebhookTest(c.key)}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {testing === c.key ? "Sending..." : c.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
 
       <Tabs defaultValue="configs" className="mt-8">
         <TabsList>
