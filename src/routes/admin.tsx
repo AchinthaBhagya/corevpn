@@ -76,14 +76,20 @@ function AdminPage() {
   };
 
   const markPaid = async (s: SubRow, paid: boolean) => {
+    const paidAt = new Date();
     const { error } = await supabase.from("subscriptions").update({
       is_paid: paid,
-      paid_at: paid ? new Date().toISOString() : null,
-      period_end: paid ? new Date(Date.now() + 30 * 86_400_000).toISOString() : s.period_end,
+      paid_at: paid ? paidAt.toISOString() : null,
+      period_end: paid ? new Date(paidAt.getTime() + 30 * 86_400_000).toISOString() : s.period_end,
     }).eq("id", s.id);
     if (error) toast.error(error.message);
-    else { toast.success(paid ? "Marked as paid — 30 days added" : "Marked as unpaid"); void load(); }
+    else {
+      if (paid) void notifyPayment({ data: { subscriptionId: s.id } });
+      toast.success(paid ? "Marked as paid — 30 days from today" : "Marked as unpaid");
+      void load();
+    }
   };
+
 
   const extendDeadline = async (s: SubRow) => {
     const input = prompt("Extend payment deadline by how many days?", "3");
