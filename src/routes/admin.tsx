@@ -4,7 +4,7 @@ import { Plus, Pencil, Trash2, Activity, Database, Users, Shield, X } from "luci
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
-import { notifyPaymentConfirmed } from "@/lib/discord.functions";
+import { notifyPaymentConfirmed, testDiscordWebhook } from "@/lib/discord.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
