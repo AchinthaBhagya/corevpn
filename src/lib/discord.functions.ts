@@ -166,3 +166,62 @@ export const notifyPaymentConfirmed = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+const testInput = z.object({
+  channel: z.enum(["user", "config", "order"]),
+});
+
+/** Admin-only: send a test message to a Discord webhook channel. */
+export const testDiscordWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => testInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) return { ok: false, message: "Forbidden" };
+
+    const envName =
+      data.channel === "user"
+        ? "DISCORD_WEBHOOK_USER_LOGS"
+        : data.channel === "config"
+          ? "DISCORD_WEBHOOK_CONFIG_LOGS"
+          : "DISCORD_WEBHOOK_ORDER_LOGS";
+    const url = process.env[envName];
+    if (!url) return { ok: false, message: `${envName} is not configured` };
+
+    const { data: prof } = await context.supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "coreVPN",
+          embeds: [
+            {
+              title: "🔔 Webhook test",
+              color: 0x6366f1,
+              fields: [
+                { name: "Channel", value: data.channel, inline: true },
+                { name: "Triggered by", value: prof?.email ?? context.userId, inline: true },
+                { name: "Time", value: new Date().toLocaleString("en-GB"), inline: false },
+              ],
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        }),
+      });
+      if (!res.ok) {
+        return { ok: false, message: `Discord responded ${res.status}` };
+      }
+      return { ok: true, message: "Test message sent" };
+    } catch {
+      return { ok: false, message: "Network error sending to Discord" };
+    }
+  });
