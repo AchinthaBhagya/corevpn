@@ -54,6 +54,8 @@ function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const notifyPayment = useServerFn(notifyPaymentConfirmed);
+  const testWebhook = useServerFn(testDiscordWebhook);
+  const [testing, setTesting] = useState<string | null>(null);
   const [configs, setConfigs] = useState<Config[]>([]);
 
   const [logs, setLogs] = useState<LogRow[]>([]);
