@@ -66,6 +66,7 @@ export const notifyConfigDownload = createServerFn({ method: "POST" })
       title: "📥 Config downloaded",
       color: 0x22c55e,
       fields: [
+        { name: "Customer User ID", value: context.userId, inline: false },
         { name: "User", value: prof?.email ?? context.userId },
         { name: "Name", value: prof?.display_name ?? "—" },
         { name: "ISP", value: cfg.isp },
@@ -104,10 +105,13 @@ export const notifyPlanOrder = createServerFn({ method: "POST" })
       title: "🛒 New plan order",
       color: 0xf59e0b,
       fields: [
+        { name: "Order ID", value: data.subscriptionId, inline: false },
+        { name: "Customer User ID", value: context.userId, inline: false },
         { name: "User", value: prof?.email ?? context.userId },
         { name: "Name", value: prof?.display_name ?? "—" },
         { name: "Plan", value: String(sub.plan_tier).toUpperCase() },
         { name: "Price", value: `LKR ${sub.price_lkr}` },
+        { name: "Ordered on", value: new Date(sub.created_at).toLocaleString("en-GB") },
         { name: "Pay by", value: new Date(sub.pay_by_date).toLocaleString("en-GB") },
         { name: "Paid", value: sub.is_paid ? "Yes" : "Pending" },
       ],
@@ -134,7 +138,7 @@ export const notifyPaymentConfirmed = createServerFn({ method: "POST" })
 
     const { data: sub } = await context.supabase
       .from("subscriptions")
-      .select("user_id, plan_tier, price_lkr, paid_at, period_end, is_paid")
+      .select("user_id, plan_tier, price_lkr, paid_at, period_end, is_paid, updated_at")
       .eq("id", data.subscriptionId)
       .maybeSingle();
     if (!sub || !sub.is_paid) return { ok: false };
@@ -149,10 +153,13 @@ export const notifyPaymentConfirmed = createServerFn({ method: "POST" })
       title: "✅ Payment confirmed — 30 days activated",
       color: 0x22c55e,
       fields: [
+        { name: "Order ID", value: data.subscriptionId, inline: false },
+        { name: "Customer User ID", value: sub.user_id, inline: false },
         { name: "User", value: prof?.email ?? sub.user_id },
         { name: "Name", value: prof?.display_name ?? "—" },
         { name: "Plan", value: String(sub.plan_tier).toUpperCase() },
         { name: "Paid", value: `LKR ${sub.price_lkr}` },
+        { name: "Slip updated on", value: new Date(sub.updated_at).toLocaleString("en-GB") },
         { name: "Paid on", value: sub.paid_at ? new Date(sub.paid_at).toLocaleString("en-GB") : "—" },
         { name: "Expires", value: sub.period_end ? new Date(sub.period_end).toLocaleString("en-GB") : "—" },
       ],
