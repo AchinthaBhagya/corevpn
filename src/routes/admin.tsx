@@ -2,8 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Activity, Database, Users, Shield, X } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
+import { notifyPaymentConfirmed } from "@/lib/discord.functions";
 import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +53,9 @@ const empty = {
 function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const notifyPayment = useServerFn(notifyPaymentConfirmed);
   const [configs, setConfigs] = useState<Config[]>([]);
+
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [subs, setSubs] = useState<SubRow[]>([]);
@@ -76,14 +81,20 @@ function AdminPage() {
   };
 
   const markPaid = async (s: SubRow, paid: boolean) => {
+    const paidAt = new Date();
     const { error } = await supabase.from("subscriptions").update({
       is_paid: paid,
-      paid_at: paid ? new Date().toISOString() : null,
-      period_end: paid ? new Date(Date.now() + 30 * 86_400_000).toISOString() : s.period_end,
+      paid_at: paid ? paidAt.toISOString() : null,
+      period_end: paid ? new Date(paidAt.getTime() + 30 * 86_400_000).toISOString() : s.period_end,
     }).eq("id", s.id);
     if (error) toast.error(error.message);
-    else { toast.success(paid ? "Marked as paid — 30 days added" : "Marked as unpaid"); void load(); }
+    else {
+      if (paid) void notifyPayment({ data: { subscriptionId: s.id } });
+      toast.success(paid ? "Marked as paid — 30 days from today" : "Marked as unpaid");
+      void load();
+    }
   };
+
 
   const extendDeadline = async (s: SubRow) => {
     const input = prompt("Extend payment deadline by how many days?", "3");
