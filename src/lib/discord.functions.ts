@@ -114,3 +114,48 @@ export const notifyPlanOrder = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+const paymentInput = z.object({
+  subscriptionId: z.string().uuid(),
+});
+
+/** Admin confirmed a bank slip / payment — 30 day access starts now. */
+export const notifyPaymentConfirmed = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => paymentInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { sendDiscord } = await import("./discord.server");
+
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) return { ok: false };
+
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("user_id, plan_tier, price_lkr, paid_at, period_end, is_paid")
+      .eq("id", data.subscriptionId)
+      .maybeSingle();
+    if (!sub || !sub.is_paid) return { ok: false };
+
+    const { data: prof } = await context.supabase
+      .from("profiles")
+      .select("email, display_name")
+      .eq("id", sub.user_id)
+      .maybeSingle();
+
+    await sendDiscord(process.env["DISCORD_WEBHOOK_ORDER_LOGS"], {
+      title: "✅ Payment confirmed — 30 days activated",
+      color: 0x22c55e,
+      fields: [
+        { name: "User", value: prof?.email ?? sub.user_id },
+        { name: "Name", value: prof?.display_name ?? "—" },
+        { name: "Plan", value: String(sub.plan_tier).toUpperCase() },
+        { name: "Paid", value: `LKR ${sub.price_lkr}` },
+        { name: "Paid on", value: sub.paid_at ? new Date(sub.paid_at).toLocaleString("en-GB") : "—" },
+        { name: "Expires", value: sub.period_end ? new Date(sub.period_end).toLocaleString("en-GB") : "—" },
+      ],
+    });
+    return { ok: true };
+  });
