@@ -54,6 +54,7 @@ function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const notifyPayment = useServerFn(notifyPaymentConfirmed);
+  const [configs, setConfigs] = useState<Config[]>([]);
 
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
