@@ -82,6 +82,19 @@ function AdminPage() {
     if (s.data) setSubs(s.data as SubRow[]);
   };
 
+  const runWebhookTest = async (channel: "user" | "config" | "order") => {
+    setTesting(channel);
+    try {
+      const res = await testWebhook({ data: { channel } });
+      if (res.ok) toast.success(`${channel} webhook: ${res.message}`);
+      else toast.error(`${channel} webhook: ${res.message}`);
+    } catch {
+      toast.error("Webhook test failed");
+    } finally {
+      setTesting(null);
+    }
+  };
+
   const markPaid = async (s: SubRow, paid: boolean) => {
     const paidAt = new Date();
     const { error } = await supabase.from("subscriptions").update({
