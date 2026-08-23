@@ -16,7 +16,7 @@ import {
 import {
   DEFAULT_GRACE_DAYS, MAX_GRACE_DAYS, formatLKR, planDataLabel,
   subscriptionStatus, daysLeft, whatsappLink, BANK_DETAILS,
-  type Plan, type Subscription,
+  type Plan,
 } from "@/lib/plans";
 
 export const Route = createFileRoute("/plans")({
