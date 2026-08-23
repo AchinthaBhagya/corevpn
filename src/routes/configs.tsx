@@ -200,15 +200,22 @@ function Configs() {
                         Expires: {new Date(c.expire_date).toLocaleDateString()}
                       </div>
                     )}
-                    <Button
-                      onClick={() => handleCopy(c)}
-                      size="sm"
-                      className="mt-4 w-full bg-gradient-primary text-primary-foreground"
-                      disabled={c.requires_premium && !unlocked}
-                    >
-                      <Copy className="mr-1.5 h-3.5 w-3.5" />
-                      {c.requires_premium && !unlocked ? "Plan required" : "Copy config"}
-                    </Button>
+                    {c.requires_premium && !unlocked ? (
+                      <Button asChild size="sm" className="mt-4 w-full bg-gradient-primary text-primary-foreground">
+                        <Link to="/plans">
+                          <Star className="mr-1.5 h-3.5 w-3.5" /> Get a plan
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleCopy(c)}
+                        size="sm"
+                        className="mt-4 w-full bg-gradient-primary text-primary-foreground"
+                      >
+                        <Copy className="mr-1.5 h-3.5 w-3.5" />
+                        Copy config
+                      </Button>
+                    )}
 
                   </div>
                 ))}

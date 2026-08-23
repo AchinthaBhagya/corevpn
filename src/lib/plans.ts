@@ -29,6 +29,20 @@ export type Subscription = {
 export const MAX_GRACE_DAYS = 7;
 export const DEFAULT_GRACE_DAYS = 3;
 
+/** Where customers send bank-slip screenshots after paying. */
+export const ADMIN_WHATSAPP = "94726330108"; // 072 633 0108
+
+export const BANK_DETAILS = {
+  bank: "BOC",
+  holder: "A.B. Premarathna",
+  account: "0096471982",
+  branch: "Kandy",
+};
+
+export function whatsappLink(message: string) {
+  return `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(message)}`;
+}
+
 export function planDataLabel(p: Pick<Plan, "data_gb">) {
   return p.data_gb ? `${p.data_gb} GB / month` : "Unlimited data";
 }
