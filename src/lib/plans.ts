@@ -29,8 +29,9 @@ export type Subscription = {
 export const MAX_GRACE_DAYS = 7;
 export const DEFAULT_GRACE_DAYS = 3;
 
-/** Where customers send bank-slip screenshots after paying. */
-export const ADMIN_WHATSAPP = "94742173566"; // 074 217 3566
+/** Where customers send bank-slip screenshots after paying.
+ *  A full WhatsApp click-to-chat link (wa.me/message/...) or a bare phone number. */
+export const ADMIN_WHATSAPP = "https://wa.me/message/YIGZTMDLT3O2J1";
 
 export const BANK_DETAILS = {
   bank: "BOC",
@@ -40,6 +41,11 @@ export const BANK_DETAILS = {
 };
 
 export function whatsappLink(message: string) {
+  // If ADMIN_WHATSAPP is a full URL, append the pre-filled text; otherwise treat it as a phone number.
+  if (/^https?:\/\//i.test(ADMIN_WHATSAPP)) {
+    const sep = ADMIN_WHATSAPP.includes("?") ? "&" : "?";
+    return `${ADMIN_WHATSAPP}${sep}text=${encodeURIComponent(message)}`;
+  }
   return `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(message)}`;
 }
 
