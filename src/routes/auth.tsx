@@ -45,20 +45,44 @@ function AuthPage() {
 
   const handleGoogle = async () => {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) {
-      toast.error(result.error.message);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        const msg = /unsupported provider/i.test(result.error.message)
+          ? "Google sign-in isn't enabled yet. Please try again in a moment or use email login."
+          : result.error.message;
+        toast.error(msg);
+        setBusy(false);
+        return;
+      }
+      if (result.redirected) return;
+
+      // Wait for the Supabase session to hydrate before reading the user.
+      let email: string | undefined;
+      for (let i = 0; i < 10; i++) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email) {
+          email = data.session.user.email;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 300));
+      }
+      if (!email) {
+        toast.error("Sign-in didn't complete. Please try again.");
+        setBusy(false);
+        return;
+      }
+      void notifySignup({ data: { email, provider: "google" } });
+      toast.success("Signed in!");
+      navigate({ to: "/configs" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
       setBusy(false);
-      return;
     }
-    if (result.redirected) return;
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user?.email) {
-      void notifySignup({ data: { email: u.user.email, provider: "google" } });
-    }
-    toast.success("Signed in!");
-    navigate({ to: "/configs" });
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
