@@ -30,7 +30,7 @@ export const MAX_GRACE_DAYS = 7;
 export const DEFAULT_GRACE_DAYS = 3;
 
 /** Where customers send bank-slip screenshots after paying. */
-export const ADMIN_WHATSAPP = "94726330108"; // 072 633 0108
+export const ADMIN_WHATSAPP = "94742173566"; // 074 217 3566
 
 export const BANK_DETAILS = {
   bank: "BOC",
