@@ -61,6 +61,8 @@ function AdminPage() {
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [subs, setSubs] = useState<SubRow[]>([]);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
