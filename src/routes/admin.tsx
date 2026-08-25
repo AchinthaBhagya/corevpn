@@ -192,6 +192,29 @@ function AdminPage() {
     else { toast.success(`${u.email} → ${!u.is_premium ? "Premium" : "Free"}`); void load(); }
   };
 
+  const MAIN_ADMIN_EMAIL = "godfather.devup@gmail.com";
+  const isMainAdmin = (user?.email ?? "").toLowerCase() === MAIN_ADMIN_EMAIL;
+
+  const toggleAdmin = async (u: UserRow) => {
+    if (!isMainAdmin) return;
+    if (u.email.toLowerCase() === MAIN_ADMIN_EMAIL) {
+      toast.error("Main admin role cannot be changed");
+      return;
+    }
+    const currentlyAdmin = adminIds.has(u.id);
+    if (currentlyAdmin) {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", u.id).eq("role", "admin");
+      if (error) return toast.error(error.message);
+      toast.success(`${u.email} → removed admin`);
+    } else {
+      const { error } = await supabase.from("user_roles").insert({ user_id: u.id, role: "admin" });
+      if (error) return toast.error(error.message);
+      toast.success(`${u.email} → admin`);
+    }
+    void load();
+  };
+
+
   if (loading) return <div className="container mx-auto p-16 text-center text-muted-foreground">Loading…</div>;
   if (!isAdmin) return null;
 
