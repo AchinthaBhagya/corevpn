@@ -342,6 +342,7 @@ function AdminPage() {
                   <tr>
                     <th className="p-3">Email</th><th className="p-3">Name</th>
                     <th className="p-3">Joined</th><th className="p-3">Premium</th>
+                    <th className="p-3">Admin</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -353,7 +354,19 @@ function AdminPage() {
                       <td className="p-3">
                         <Switch checked={u.is_premium} onCheckedChange={() => togglePremium(u)} />
                       </td>
+                      <td className="p-3">
+                        {u.email.toLowerCase() === MAIN_ADMIN_EMAIL ? (
+                          <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-foreground">
+                            Main admin
+                          </span>
+                        ) : isMainAdmin ? (
+                          <Switch checked={adminIds.has(u.id)} onCheckedChange={() => toggleAdmin(u)} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{adminIds.has(u.id) ? "Admin" : "—"}</span>
+                        )}
+                      </td>
                     </tr>
+
                   ))}
                 </tbody>
               </table>
