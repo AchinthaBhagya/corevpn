@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadExtras = async (uid: string, email: string | undefined) => {
+  const loadExtras = async (uid: string, _email: string | undefined, opts?: { log?: boolean }) => {
     const [{ data: prof }, { data: roles }, { data: subs }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
@@ -51,11 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin((roles ?? []).some((r: { role: string }) => r.role === "admin"));
     setSubscription(((subs ?? [])[0] as Subscription | undefined) ?? null);
     // Log login once per session start
-    void supabase.from("access_logs").insert({
-      user_id: uid,
-      action: "session_active",
-    });
+    if (opts?.log !== false) {
+      void supabase.from("access_logs").insert({
+        user_id: uid,
+        action: "session_active",
+      });
+    }
   };
+
 
 
   useEffect(() => {
@@ -84,9 +87,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Keep role/profile fresh so a newly granted admin sees the panel without re-login.
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.id;
+    const email = user.email;
+    const tick = () => { void loadExtras(uid, email, { log: false }); };
+    const onFocus = () => { if (document.visibilityState === "visible") tick(); };
+    const id = window.setInterval(tick, 60_000);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const refresh = async () => {
-    if (user) await loadExtras(user.id, user.email);
+    if (user) await loadExtras(user.id, user.email, { log: false });
   };
+
 
   const signOut = async () => {
     // Stop in-flight queries before 401s land, then drop cached protected data.
