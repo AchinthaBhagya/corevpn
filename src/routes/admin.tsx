@@ -61,6 +61,8 @@ function AdminPage() {
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [subs, setSubs] = useState<SubRow[]>([]);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
@@ -70,17 +72,20 @@ function AdminPage() {
   }, [user, isAdmin, loading, navigate]);
 
   const load = async () => {
-    const [c, l, u, s] = await Promise.all([
+    const [c, l, u, s, r] = await Promise.all([
       supabase.from("configs").select("*").order("created_at", { ascending: false }),
       supabase.from("access_logs").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("profiles").select("id,email,display_name,is_premium,created_at").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*").order("created_at", { ascending: false }),
+      supabase.from("user_roles").select("user_id,role").eq("role", "admin"),
     ]);
     if (c.data) setConfigs(c.data as Config[]);
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
     if (s.data) setSubs(s.data as SubRow[]);
+    if (r.data) setAdminIds(new Set((r.data as { user_id: string }[]).map((x) => x.user_id)));
   };
+
 
   const runWebhookTest = async (channel: "user" | "config" | "order") => {
     setTesting(channel);
@@ -186,6 +191,29 @@ function AdminPage() {
     if (error) toast.error(error.message);
     else { toast.success(`${u.email} → ${!u.is_premium ? "Premium" : "Free"}`); void load(); }
   };
+
+  const MAIN_ADMIN_EMAIL = "godfather.devup@gmail.com";
+  const isMainAdmin = (user?.email ?? "").toLowerCase() === MAIN_ADMIN_EMAIL;
+
+  const toggleAdmin = async (u: UserRow) => {
+    if (!isMainAdmin) return;
+    if (u.email.toLowerCase() === MAIN_ADMIN_EMAIL) {
+      toast.error("Main admin role cannot be changed");
+      return;
+    }
+    const currentlyAdmin = adminIds.has(u.id);
+    if (currentlyAdmin) {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", u.id).eq("role", "admin");
+      if (error) return toast.error(error.message);
+      toast.success(`${u.email} → removed admin`);
+    } else {
+      const { error } = await supabase.from("user_roles").insert({ user_id: u.id, role: "admin" });
+      if (error) return toast.error(error.message);
+      toast.success(`${u.email} → admin`);
+    }
+    void load();
+  };
+
 
   if (loading) return <div className="container mx-auto p-16 text-center text-muted-foreground">Loading…</div>;
   if (!isAdmin) return null;
@@ -314,6 +342,7 @@ function AdminPage() {
                   <tr>
                     <th className="p-3">Email</th><th className="p-3">Name</th>
                     <th className="p-3">Joined</th><th className="p-3">Premium</th>
+                    <th className="p-3">Admin</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -325,7 +354,19 @@ function AdminPage() {
                       <td className="p-3">
                         <Switch checked={u.is_premium} onCheckedChange={() => togglePremium(u)} />
                       </td>
+                      <td className="p-3">
+                        {u.email.toLowerCase() === MAIN_ADMIN_EMAIL ? (
+                          <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-foreground">
+                            Main admin
+                          </span>
+                        ) : isMainAdmin ? (
+                          <Switch checked={adminIds.has(u.id)} onCheckedChange={() => toggleAdmin(u)} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{adminIds.has(u.id) ? "Admin" : "—"}</span>
+                        )}
+                      </td>
                     </tr>
+
                   ))}
                 </tbody>
               </table>
