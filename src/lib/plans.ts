@@ -49,6 +49,11 @@ export function whatsappLink(message: string) {
   return `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(message)}`;
 }
 
+/** Open the admin WhatsApp chat with a simple greeting — for general customer enquiries, not slip messages. */
+export function whatsappContactLink() {
+  return whatsappLink("Hi coreVPN 👋");
+}
+
 export function planDataLabel(p: Pick<Plan, "data_gb">) {
   return p.data_gb ? `${p.data_gb} GB / month` : "Unlimited data";
 }
