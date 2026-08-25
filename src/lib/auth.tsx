@@ -87,9 +87,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Keep role/profile fresh so a newly granted admin sees the panel without re-login.
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.id;
+    const email = user.email;
+    const tick = () => { void loadExtras(uid, email, { log: false }); };
+    const onFocus = () => { if (document.visibilityState === "visible") tick(); };
+    const id = window.setInterval(tick, 60_000);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const refresh = async () => {
-    if (user) await loadExtras(user.id, user.email);
+    if (user) await loadExtras(user.id, user.email, { log: false });
   };
+
 
   const signOut = async () => {
     // Stop in-flight queries before 401s land, then drop cached protected data.
