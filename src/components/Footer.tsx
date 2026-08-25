@@ -30,6 +30,15 @@ export function Footer() {
         </div>
         <div className="flex items-center gap-4">
           <a
+            href={whatsappContactLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/15 px-3 py-1.5 text-sm font-medium text-[#25D366] transition-colors hover:bg-[#25D366]/25"
+          >
+            <WhatsAppIcon className="h-4 w-4" />
+            WhatsApp
+          </a>
+          <a
             href={TELEGRAM_GROUP_URL}
             target="_blank"
             rel="noopener noreferrer"
