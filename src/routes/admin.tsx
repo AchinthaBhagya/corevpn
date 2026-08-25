@@ -70,17 +70,20 @@ function AdminPage() {
   }, [user, isAdmin, loading, navigate]);
 
   const load = async () => {
-    const [c, l, u, s] = await Promise.all([
+    const [c, l, u, s, r] = await Promise.all([
       supabase.from("configs").select("*").order("created_at", { ascending: false }),
       supabase.from("access_logs").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("profiles").select("id,email,display_name,is_premium,created_at").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*").order("created_at", { ascending: false }),
+      supabase.from("user_roles").select("user_id,role").eq("role", "admin"),
     ]);
     if (c.data) setConfigs(c.data as Config[]);
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
     if (s.data) setSubs(s.data as SubRow[]);
+    if (r.data) setAdminIds(new Set((r.data as { user_id: string }[]).map((x) => x.user_id)));
   };
+
 
   const runWebhookTest = async (channel: "user" | "config" | "order") => {
     setTesting(channel);
