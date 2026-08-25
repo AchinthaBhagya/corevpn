@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadExtras = async (uid: string, email: string | undefined) => {
+  const loadExtras = async (uid: string, _email: string | undefined, opts?: { log?: boolean }) => {
     const [{ data: prof }, { data: roles }, { data: subs }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
@@ -51,11 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin((roles ?? []).some((r: { role: string }) => r.role === "admin"));
     setSubscription(((subs ?? [])[0] as Subscription | undefined) ?? null);
     // Log login once per session start
-    void supabase.from("access_logs").insert({
-      user_id: uid,
-      action: "session_active",
-    });
+    if (opts?.log !== false) {
+      void supabase.from("access_logs").insert({
+        user_id: uid,
+        action: "session_active",
+      });
+    }
   };
+
 
 
   useEffect(() => {
