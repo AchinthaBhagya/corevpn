@@ -5,7 +5,6 @@ import { Shield, Mail, Lock, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { notifyRegistration } from "@/lib/discord.functions";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -43,45 +42,6 @@ function AuthPage() {
     if (user) navigate({ to: "/configs" });
   }, [user, navigate]);
 
-  const handleGoogle = async () => {
-    setBusy(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        const msg = /unsupported provider/i.test(result.error.message)
-          ? "Google sign-in isn't enabled yet. Please try again in a moment or use email login."
-          : result.error.message;
-        toast.error(msg);
-        setBusy(false);
-        return;
-      }
-      if (result.redirected) return;
-
-      // Wait for the Supabase session to hydrate before reading the user.
-      let email: string | undefined;
-      for (let i = 0; i < 10; i++) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user?.email) {
-          email = data.session.user.email;
-          break;
-        }
-        await new Promise((r) => setTimeout(r, 300));
-      }
-      if (!email) {
-        toast.error("Sign-in didn't complete. Please try again.");
-        setBusy(false);
-        return;
-      }
-      void notifySignup({ data: { email, provider: "google" } });
-      toast.success("Signed in!");
-      navigate({ to: "/configs" });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
-      setBusy(false);
-    }
-  };
 
 
   const handleSubmit = async (e: React.FormEvent) => {
