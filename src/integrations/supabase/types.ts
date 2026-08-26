@@ -57,6 +57,8 @@ export type Database = {
       }
       configs: {
         Row: {
+          assigned_at: string | null
+          assigned_to: string | null
           config_data: string
           config_name: string
           created_at: string
@@ -65,12 +67,15 @@ export type Database = {
           expire_date: string | null
           id: string
           is_active: boolean
+          is_assigned: boolean
           isp: string
           package_name: string
           requires_premium: boolean
           updated_at: string
         }
         Insert: {
+          assigned_at?: string | null
+          assigned_to?: string | null
           config_data: string
           config_name: string
           created_at?: string
@@ -79,12 +84,15 @@ export type Database = {
           expire_date?: string | null
           id?: string
           is_active?: boolean
+          is_assigned?: boolean
           isp: string
           package_name: string
           requires_premium?: boolean
           updated_at?: string
         }
         Update: {
+          assigned_at?: string | null
+          assigned_to?: string | null
           config_data?: string
           config_name?: string
           created_at?: string
@@ -93,12 +101,60 @@ export type Database = {
           expire_date?: string | null
           id?: string
           is_active?: boolean
+          is_assigned?: boolean
           isp?: string
           package_name?: string
           requires_premium?: boolean
           updated_at?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          slip_path: string | null
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          slip_path?: string | null
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          slip_path?: string | null
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
@@ -147,7 +203,9 @@ export type Database = {
           email: string
           id: string
           is_premium: boolean
+          phone: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -156,7 +214,9 @@ export type Database = {
           email: string
           id: string
           is_premium?: boolean
+          phone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -165,7 +225,9 @@ export type Database = {
           email?: string
           id?: string
           is_premium?: boolean
+          phone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -173,46 +235,69 @@ export type Database = {
         Row: {
           admin_note: string | null
           cancelled: boolean
+          config_id: string | null
           created_at: string
+          customer_name: string | null
+          customer_whatsapp: string | null
           id: string
           is_paid: boolean
+          isp: string | null
           paid_at: string | null
           pay_by_date: string
           period_end: string | null
           plan_tier: Database["public"]["Enums"]["plan_tier"]
           price_lkr: number
+          sim_package: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           admin_note?: string | null
           cancelled?: boolean
+          config_id?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_whatsapp?: string | null
           id?: string
           is_paid?: boolean
+          isp?: string | null
           paid_at?: string | null
           pay_by_date: string
           period_end?: string | null
           plan_tier: Database["public"]["Enums"]["plan_tier"]
           price_lkr: number
+          sim_package?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           admin_note?: string | null
           cancelled?: boolean
+          config_id?: string | null
           created_at?: string
+          customer_name?: string | null
+          customer_whatsapp?: string | null
           id?: string
           is_paid?: boolean
+          isp?: string | null
           paid_at?: string | null
           pay_by_date?: string
           period_end?: string | null
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           price_lkr?: number
+          sim_package?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "configs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -240,12 +325,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_package: {
+        Args: {
+          _customer_name: string
+          _customer_whatsapp: string
+          _isp: string
+          _plan_tier: Database["public"]["Enums"]["plan_tier"]
+          _sim_package: string
+        }
+        Returns: string
+      }
+      approve_payment: {
+        Args: { _payment_id?: string; _subscription_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_payment: {
+        Args: { _note?: string; _payment_id: string }
+        Returns: undefined
       }
     }
     Enums: {
