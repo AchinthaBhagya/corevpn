@@ -115,8 +115,9 @@ export function subscriptionStatus(s: Subscription | null | undefined): {
   }
   return new Date(s.pay_by_date).getTime() > now
     ? { label: "Active — payment pending", tone: "grace" }
-    : { label: "Disconnected — unpaid", tone: "expired" };
+    : { label: "Pending payment approval", tone: "expired" };
 }
+
 
 export function daysLeft(dateIso: string) {
   const ms = new Date(dateIso).getTime() - Date.now();
