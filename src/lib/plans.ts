@@ -23,7 +23,13 @@ export type Subscription = {
   cancelled: boolean;
   admin_note: string | null;
   created_at: string;
+  isp?: string | null;
+  sim_package?: string | null;
+  config_id?: string | null;
+  customer_name?: string | null;
+  customer_whatsapp?: string | null;
 };
+
 
 /** ISPs we hold config pools for. */
 export const ISPS = ["Dialog", "Hutch", "Mobitel", "SLT", "Airtel"] as const;
