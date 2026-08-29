@@ -23,9 +23,14 @@ const loginSchema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
   password: z.string().min(6, "At least 6 characters").max(128),
 });
+const phoneSchema = z.string().trim().min(9, "Enter a valid number").max(20)
+  .regex(/^[0-9+\s-]+$/, "Numbers only");
 const registerSchema = loginSchema.extend({
   displayName: z.string().trim().min(2, "Name too short").max(60),
+  phone: phoneSchema,
+  whatsapp: phoneSchema,
 });
+
 
 function AuthPage() {
   const { user } = useAuth();
@@ -35,6 +40,8 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
   const notifySignup = useServerFn(notifyRegistration);
 
@@ -49,18 +56,23 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "register") {
-        const parsed = registerSchema.parse({ email, password, displayName });
+        const parsed = registerSchema.parse({ email, password, displayName, phone, whatsapp });
         const { error } = await supabase.auth.signUp({
           email: parsed.email,
           password: parsed.password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { display_name: parsed.displayName },
+            data: {
+              display_name: parsed.displayName,
+              phone: parsed.phone,
+              whatsapp: parsed.whatsapp,
+            },
           },
         });
         if (error) throw error;
         void notifySignup({ data: { email: parsed.email, displayName: parsed.displayName, provider: "email" } });
         toast.success("Account created! Check your inbox to verify your email.");
+
       } else {
         const parsed = loginSchema.parse({ email, password });
         const { error } = await supabase.auth.signInWithPassword({
@@ -95,14 +107,33 @@ function AuthPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {mode === "register" && (
-            <div>
-              <Label htmlFor="name">Display name</Label>
-              <div className="relative mt-1">
-                <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="name" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="pl-9" placeholder="John Doe" />
+            <>
+              <div>
+                <Label htmlFor="name">Full name</Label>
+                <div className="relative mt-1">
+                  <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="name" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="pl-9" placeholder="John Doe" />
+                </div>
               </div>
-            </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="phone">Phone number</Label>
+                  <div className="relative mt-1">
+                    <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input id="phone" required inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-9" placeholder="0771234567" maxLength={20} />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="whatsapp">WhatsApp number</Label>
+                  <div className="relative mt-1">
+                    <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input id="whatsapp" required inputMode="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="pl-9" placeholder="0771234567" maxLength={20} />
+                  </div>
+                </div>
+              </div>
+            </>
           )}
+
           <div>
             <Label htmlFor="email">Email</Label>
             <div className="relative mt-1">

@@ -23,11 +23,43 @@ export type Subscription = {
   cancelled: boolean;
   admin_note: string | null;
   created_at: string;
+  isp?: string | null;
+  sim_package?: string | null;
+  config_id?: string | null;
+  customer_name?: string | null;
+  customer_whatsapp?: string | null;
+};
+
+
+/** ISPs we hold config pools for. */
+export const ISPS = ["Dialog", "Hutch", "Mobitel", "SLT", "Airtel"] as const;
+export type Isp = (typeof ISPS)[number];
+
+/** SIM packages a customer can pick when activating. */
+export const SIM_PACKAGES = [
+  "Any available",
+  "724 Zoom",
+  "Social Media Package",
+  "Unlimited Zoom",
+  "WhatsApp Package",
+] as const;
+
+export type PaymentRow = {
+  id: string;
+  subscription_id: string;
+  user_id: string;
+  slip_path: string | null;
+  note: string | null;
+  status: string;
+  verified_by: string | null;
+  verified_at: string | null;
+  created_at: string;
 };
 
 /** Max number of days a customer may take before paying. */
 export const MAX_GRACE_DAYS = 7;
 export const DEFAULT_GRACE_DAYS = 3;
+
 
 /** Where customers send bank-slip screenshots after paying.
  *  A full WhatsApp click-to-chat link (wa.me/message/...) or a bare phone number. */
@@ -83,8 +115,9 @@ export function subscriptionStatus(s: Subscription | null | undefined): {
   }
   return new Date(s.pay_by_date).getTime() > now
     ? { label: "Active — payment pending", tone: "grace" }
-    : { label: "Disconnected — unpaid", tone: "expired" };
+    : { label: "Pending payment approval", tone: "expired" };
 }
+
 
 export function daysLeft(dateIso: string) {
   const ms = new Date(dateIso).getTime() - Date.now();
