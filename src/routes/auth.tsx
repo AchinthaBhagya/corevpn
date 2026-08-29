@@ -23,9 +23,14 @@ const loginSchema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
   password: z.string().min(6, "At least 6 characters").max(128),
 });
+const phoneSchema = z.string().trim().min(9, "Enter a valid number").max(20)
+  .regex(/^[0-9+\s-]+$/, "Numbers only");
 const registerSchema = loginSchema.extend({
   displayName: z.string().trim().min(2, "Name too short").max(60),
+  phone: phoneSchema,
+  whatsapp: phoneSchema,
 });
+
 
 function AuthPage() {
   const { user } = useAuth();
