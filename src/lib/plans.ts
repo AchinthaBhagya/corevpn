@@ -25,9 +25,35 @@ export type Subscription = {
   created_at: string;
 };
 
+/** ISPs we hold config pools for. */
+export const ISPS = ["Dialog", "Hutch", "Mobitel", "SLT", "Airtel"] as const;
+export type Isp = (typeof ISPS)[number];
+
+/** SIM packages a customer can pick when activating. */
+export const SIM_PACKAGES = [
+  "Any available",
+  "724 Zoom",
+  "Social Media Package",
+  "Unlimited Zoom",
+  "WhatsApp Package",
+] as const;
+
+export type PaymentRow = {
+  id: string;
+  subscription_id: string;
+  user_id: string;
+  slip_path: string | null;
+  note: string | null;
+  status: string;
+  verified_by: string | null;
+  verified_at: string | null;
+  created_at: string;
+};
+
 /** Max number of days a customer may take before paying. */
 export const MAX_GRACE_DAYS = 7;
 export const DEFAULT_GRACE_DAYS = 3;
+
 
 /** Where customers send bank-slip screenshots after paying.
  *  A full WhatsApp click-to-chat link (wa.me/message/...) or a bare phone number. */
