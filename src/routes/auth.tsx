@@ -40,6 +40,8 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
   const notifySignup = useServerFn(notifyRegistration);
 
@@ -54,18 +56,23 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "register") {
-        const parsed = registerSchema.parse({ email, password, displayName });
+        const parsed = registerSchema.parse({ email, password, displayName, phone, whatsapp });
         const { error } = await supabase.auth.signUp({
           email: parsed.email,
           password: parsed.password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { display_name: parsed.displayName },
+            data: {
+              display_name: parsed.displayName,
+              phone: parsed.phone,
+              whatsapp: parsed.whatsapp,
+            },
           },
         });
         if (error) throw error;
         void notifySignup({ data: { email: parsed.email, displayName: parsed.displayName, provider: "email" } });
         toast.success("Account created! Check your inbox to verify your email.");
+
       } else {
         const parsed = loginSchema.parse({ email, password });
         const { error } = await supabase.auth.signInWithPassword({
