@@ -10,7 +10,10 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   is_premium: boolean;
+  phone?: string | null;
+  whatsapp?: string | null;
 };
+
 
 type AuthCtx = {
   user: User | null;
