@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Crown, Clock, Zap, AlertTriangle, Landmark, User, Mail, ArrowLeft, ArrowRight, BadgeCheck } from "lucide-react";
+import { Check, Crown, Clock, Zap, AlertTriangle, Landmark, User, Mail, ArrowLeft, ArrowRight, BadgeCheck, Signal, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { notifyPlanOrder } from "@/lib/discord.functions";
@@ -10,13 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SlipUpload, SlipStatusBadge } from "@/components/SlipUpload";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  DEFAULT_GRACE_DAYS, MAX_GRACE_DAYS, formatLKR, planDataLabel,
+  MAX_GRACE_DAYS, formatLKR, planDataLabel, ISPS, SIM_PACKAGES,
   subscriptionStatus, daysLeft, whatsappLink, BANK_DETAILS,
-  type Plan,
+  type Plan, type PaymentRow,
 } from "@/lib/plans";
 
 export const Route = createFileRoute("/plans")({
@@ -24,9 +28,9 @@ export const Route = createFileRoute("/plans")({
   head: () => ({
     meta: [
       { title: "Monthly Plans & Pricing — coreVPN" },
-      { name: "description", content: "coreVPN monthly plans: Basic 100 GB LKR 200, Standard 200 GB LKR 300, Premium unlimited LKR 500. Pay by bank transfer and send your slip on WhatsApp." },
+      { name: "description", content: "coreVPN monthly plans: Basic 100 GB LKR 200, Standard 200 GB LKR 300, Premium unlimited LKR 500. Pick your SIM package, get your config instantly and activate it after payment." },
       { property: "og:title", content: "Monthly Plans & Pricing — coreVPN" },
-      { property: "og:description", content: "Pick a coreVPN monthly plan — pay to our bank, send the slip on WhatsApp, and the admin activates your access." },
+      { property: "og:description", content: "Pick a coreVPN plan and your SIM package — your VLESS config is reserved instantly and activated once the admin approves your bank slip." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -53,18 +57,19 @@ function slipMessage(opts: {
   price: number;
   name: string;
   email: string;
-  payBy: Date;
+  isp?: string | null;
+  simPackage?: string | null;
 }) {
   return [
-    "coreVPN Plan Order — Payment Slip",
+    "coreVPN Package Activation — Payment Slip",
     `Order ID: ${opts.orderId}`,
     `Plan: ${opts.planName} (${formatLKR(opts.price)} / month)`,
+    opts.isp ? `SIM: ${opts.isp}${opts.simPackage ? ` — ${opts.simPackage}` : ""}` : "",
     `Name: ${opts.name}`,
     `Email: ${opts.email}`,
-    `Pay by: ${opts.payBy.toLocaleDateString()}`,
     "",
-    "Mama me plan eka pay karala — bank slip eka me chat eken attach karanawa.",
-  ].join("\n");
+    "Mama me package eka pay karala — bank slip eka me chat eken attach karanawa.",
+  ].filter(Boolean).join("\n");
 }
 
 function BankDetailsCard() {
@@ -84,6 +89,7 @@ function BankDetailsCard() {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[0-9+\s-]{9,20}$/;
 
 type Step = "details" | "payment" | "done";
 
@@ -96,10 +102,13 @@ function PlansPage() {
   const [step, setStep] = useState<Step>("details");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [days, setDays] = useState(DEFAULT_GRACE_DAYS);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [isp, setIsp] = useState<string>(ISPS[0]);
+  const [simPackage, setSimPackage] = useState<string>(SIM_PACKAGES[0]);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [payBy, setPayBy] = useState<Date | null>(null);
+  const [gotConfig, setGotConfig] = useState<boolean>(false);
   const [busy, setBusy] = useState(false);
+  const [payments, setPayments] = useState<PaymentRow[]>([]);
 
   useEffect(() => {
     supabase.from("plans").select("*").eq("is_active", true).order("sort_order").then(({ data, error }) => {
@@ -108,14 +117,31 @@ function PlansPage() {
     });
   }, []);
 
+  const loadPayments = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("payments").select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setPayments((data ?? []) as PaymentRow[]);
+  }, [user]);
+
+  useEffect(() => { void loadPayments(); }, [loadPayments]);
+
+  const latestPayment = subscription
+    ? payments.find((p) => p.subscription_id === subscription.id) ?? null
+    : null;
+
   const openWizard = (p: Plan) => {
     setSelected(p);
     setStep("details");
-    setDays(DEFAULT_GRACE_DAYS);
     setOrderId(null);
-    setPayBy(null);
+    setGotConfig(false);
     setName(profile?.display_name ?? "");
     setEmail(user?.email ?? "");
+    setWhatsapp(profile?.whatsapp ?? "");
+    setIsp(ISPS[0]);
+    setSimPackage(SIM_PACKAGES[0]);
   };
 
   const closeWizard = () => setSelected(null);
@@ -123,53 +149,41 @@ function PlansPage() {
   const continueToPayment = () => {
     if (name.trim().length < 2) { toast.error("ඔබේ නම ඇතුළත් කරන්න"); return; }
     if (!EMAIL_RE.test(email.trim())) { toast.error("නිවැරදි email ලිපිනයක් ඇතුළත් කරන්න"); return; }
+    if (!PHONE_RE.test(whatsapp.trim())) { toast.error("නිවැරදි WhatsApp number එකක් ඇතුළත් කරන්න"); return; }
     setStep("payment");
   };
 
-  const placeOrder = async () => {
+  const activate = async () => {
     if (!user || !selected) return;
     setBusy(true);
-    const d = Math.min(Math.max(1, days), MAX_GRACE_DAYS);
-    const payByDate = new Date(Date.now() + d * 86_400_000);
-    const periodEnd = new Date(Date.now() + 30 * 86_400_000);
-    const { data: inserted, error } = await supabase.from("subscriptions").insert({
-      user_id: user.id,
-      plan_tier: selected.tier,
-      price_lkr: selected.price_lkr,
-      pay_by_date: payByDate.toISOString(),
-      period_end: periodEnd.toISOString(),
-      admin_note: `Name: ${name.trim()} • Email: ${email.trim()}`,
-    }).select("id").single();
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    const { data: subId, error } = await supabase.rpc("activate_package", {
+      _plan_tier: selected.tier,
+      _isp: isp,
+      _sim_package: simPackage === "Any available" ? "" : simPackage,
+      _customer_name: name.trim(),
+      _customer_whatsapp: whatsapp.trim(),
+    });
+    if (error) { setBusy(false); toast.error(error.message); return; }
 
-    if (name.trim() && name.trim() !== (profile?.display_name ?? "")) {
-      void supabase.from("profiles").update({ display_name: name.trim() }).eq("id", user.id);
-    }
+    const newId = subId as unknown as string;
+    const { data: subRow } = await supabase
+      .from("subscriptions").select("config_id").eq("id", newId).maybeSingle();
+    setGotConfig(Boolean(subRow?.config_id));
+
     void supabase.from("access_logs").insert({
       user_id: user.id,
-      action: "plan_started",
-      config_label: `${selected.name} • ${formatLKR(selected.price_lkr)} • ${name.trim()} • ${email.trim()} • pay by ${payByDate.toLocaleDateString()}`,
+      action: "package_activated",
+      config_id: subRow?.config_id ?? null,
+      config_label: `${selected.name} • ${isp} • ${simPackage} • ${formatLKR(selected.price_lkr)}`,
     });
-    if (inserted?.id) void notifyOrder({ data: { subscriptionId: inserted.id } });
+    void notifyOrder({ data: { subscriptionId: newId } });
 
-    setOrderId(inserted?.id ?? null);
-    setPayBy(payByDate);
+    setOrderId(newId);
     setStep("done");
-    window.open(
-      whatsappLink(slipMessage({
-        orderId: inserted?.id ?? "—",
-        planName: selected.name,
-        price: selected.price_lkr,
-        name: name.trim(),
-        email: email.trim(),
-        payBy: payByDate,
-      })),
-      "_blank",
-      "noopener,noreferrer",
-    );
-    toast.success("Order placed — WhatsApp එකෙන් slip එක එවන්න");
+    setBusy(false);
+    toast.success("Package activated — payment slip එක එවන්න");
     await refresh();
+    await loadPayments();
   };
 
   const status = subscriptionStatus(subscription);
@@ -180,10 +194,10 @@ function PlansPage() {
         <div className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
           <Crown className="h-3.5 w-3.5 text-warning-foreground" />Monthly plans
         </div>
-        <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Pick your plan</h1>
+        <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Activate your package</h1>
         <p className="mt-3 text-muted-foreground">
-          Choose a package, enter your name &amp; email, pay to our bank account and send the slip on WhatsApp —
-          the admin verifies it and activates your access for 30 days.
+          Choose a VPN package and your SIM package — a VLESS config is reserved for you instantly.
+          Pay to our bank, upload the slip (or send it on WhatsApp) and the admin activates it for 30 days.
         </p>
       </div>
 
@@ -191,20 +205,28 @@ function PlansPage() {
         <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-border/60 bg-card p-5 shadow-card">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Your subscription</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Your package</div>
               <div className="mt-1 font-display text-lg font-bold capitalize">
                 {subscription.plan_tier} — {formatLKR(subscription.price_lkr)} / month
               </div>
+              {subscription.isp && (
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  SIM: {subscription.isp}{subscription.sim_package ? ` • ${subscription.sim_package}` : ""}
+                </div>
+              )}
             </div>
-            <Badge
-              className={
-                status.tone === "active" ? "bg-primary text-primary-foreground"
-                  : status.tone === "grace" ? "bg-warning text-warning-foreground"
-                    : "bg-destructive text-destructive-foreground"
-              }
-            >
-              {status.label}
-            </Badge>
+            <div className="flex items-center gap-2">
+              {latestPayment && <SlipStatusBadge status={latestPayment.status} />}
+              <Badge
+                className={
+                  status.tone === "active" ? "bg-primary text-primary-foreground"
+                    : status.tone === "grace" ? "bg-warning text-warning-foreground"
+                      : "bg-destructive text-destructive-foreground"
+                }
+              >
+                {status.label}
+              </Badge>
+            </div>
           </div>
           {!subscription.is_paid && (
             <>
@@ -212,9 +234,17 @@ function PlansPage() {
                 {status.tone === "grace" ? <Clock className="mt-0.5 h-4 w-4 shrink-0" /> : <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
                 {status.tone === "grace"
                   ? `Pay ${formatLKR(subscription.price_lkr)} before ${new Date(subscription.pay_by_date).toLocaleDateString()} (${daysLeft(subscription.pay_by_date)} day(s) left) to keep your access.`
-                  : `Payment deadline passed on ${new Date(subscription.pay_by_date).toLocaleDateString()} — your configs are disconnected. Pay to reactivate.`}
+                  : `Your config is reserved but locked until the admin approves your payment slip.`}
               </p>
               <div className="mt-4"><BankDetailsCard /></div>
+              <div className="mt-4">
+                <SlipUpload
+                  subscriptionId={subscription.id}
+                  userId={user!.id}
+                  latest={latestPayment}
+                  onUploaded={() => void loadPayments()}
+                />
+              </div>
               <Button
                 className="mt-4 w-full bg-[#25D366] text-white hover:bg-[#1ebe5d] sm:w-auto"
                 onClick={() => {
@@ -222,9 +252,10 @@ function PlansPage() {
                     orderId: subscription.id,
                     planName: subscription.plan_tier.toUpperCase(),
                     price: subscription.price_lkr,
-                    name: profile?.display_name ?? "—",
+                    name: subscription.customer_name ?? profile?.display_name ?? "—",
                     email: user?.email ?? "—",
-                    payBy: new Date(subscription.pay_by_date),
+                    isp: subscription.isp,
+                    simPackage: subscription.sim_package,
                   });
                   window.open(whatsappLink(msg), "_blank", "noopener,noreferrer");
                 }}
@@ -233,6 +264,15 @@ function PlansPage() {
                 Send payment slip on WhatsApp
               </Button>
             </>
+          )}
+          {subscription.is_paid && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Active until{" "}
+              <strong className="text-foreground">
+                {subscription.period_end ? new Date(subscription.period_end).toLocaleDateString() : "—"}
+              </strong>{" "}
+              — <Link to="/configs" className="text-primary hover:underline">view your config</Link>.
+            </p>
           )}
         </div>
       )}
@@ -276,7 +316,7 @@ function PlansPage() {
                     onClick={() => openWizard(p)}
                   >
                     <Zap className="mr-1.5 h-4 w-4" />
-                    {hasPlanAccess ? "Switch to this plan" : "Buy now"}
+                    {hasPlanAccess ? "Switch to this package" : "Activate package"}
                   </Button>
                 )}
               </div>
@@ -286,17 +326,17 @@ function PlansPage() {
       </div>
 
       <p className="mx-auto mt-10 max-w-2xl text-center text-xs text-muted-foreground">
-        Payments are confirmed manually by the admin from your WhatsApp slip. Access stays open until your promised
-        payment date (max {MAX_GRACE_DAYS} days); after that it is cut off automatically until payment is confirmed.
+        Payments are verified manually by the admin from your uploaded slip or WhatsApp message. After approval your
+        config stays active for 30 days (grace period max {MAX_GRACE_DAYS} days).
       </p>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && closeWizard()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {step === "details" && `Buy ${selected?.name} — your details`}
-              {step === "payment" && `Buy ${selected?.name} — payment`}
-              {step === "done" && "Order placed!"}
+              {step === "details" && `${selected?.name} — your details`}
+              {step === "payment" && `${selected?.name} — payment`}
+              {step === "done" && "Package activated!"}
             </DialogTitle>
             <DialogDescription>
               {selected && `${formatLKR(selected.price_lkr)} per month • ${planDataLabel(selected)}`}
@@ -322,35 +362,51 @@ function PlansPage() {
 
           {step === "details" && (
             <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label className="flex items-center gap-1.5"><Signal className="h-3.5 w-3.5" /> SIM / ISP</Label>
+                  <Select value={isp} onValueChange={setIsp}>
+                    <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ISPS.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>SIM package</Label>
+                  <Select value={simPackage} onValueChange={setSimPackage}>
+                    <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {SIM_PACKAGES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div>
                 <Label htmlFor="buyer-name" className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5" /> Your name
                 </Label>
-                <Input
-                  id="buyer-name"
-                  className="mt-1.5"
-                  placeholder="e.g. Kamal Perera"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={80}
-                />
+                <Input id="buyer-name" className="mt-1.5" placeholder="e.g. Kamal Perera"
+                  value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
               </div>
-              <div>
-                <Label htmlFor="buyer-email" className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5" /> Your email
-                </Label>
-                <Input
-                  id="buyer-email"
-                  className="mt-1.5"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  maxLength={255}
-                />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="buyer-email" className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5" /> Your email
+                  </Label>
+                  <Input id="buyer-email" className="mt-1.5" type="email" placeholder="you@example.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} />
+                </div>
+                <div>
+                  <Label htmlFor="buyer-wa" className="flex items-center gap-1.5">
+                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp number
+                  </Label>
+                  <Input id="buyer-wa" className="mt-1.5" inputMode="tel" placeholder="0771234567"
+                    value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} maxLength={20} />
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                මේ details ඔබේ WhatsApp slip message එකට සහ order එකට add වෙනවා — admin ඔබව හඳුනාගන්න.
+                මේ details order එකට add වෙනවා — admin ඔබව හඳුනාගෙන config එක release කරනවා.
               </p>
             </div>
           )}
@@ -359,29 +415,14 @@ function PlansPage() {
             <div className="space-y-4">
               <div className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm">
                 <span className="font-semibold">{selected.name}</span> — {formatLKR(selected.price_lkr)} / month
-                <div className="mt-1 text-xs text-muted-foreground">{name.trim()} • {email.trim()}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {isp} • {simPackage} • {name.trim()} • {whatsapp.trim()}
+                </div>
               </div>
               <BankDetailsCard />
-              <div>
-                <Label htmlFor="days">I will pay within (days)</Label>
-                <Input
-                  id="days"
-                  className="mt-1.5"
-                  type="number"
-                  min={1}
-                  max={MAX_GRACE_DAYS}
-                  value={days}
-                  onChange={(e) => setDays(Number(e.target.value))}
-                />
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  Your configs unlock immediately. If payment isn't confirmed by{" "}
-                  <strong>{new Date(Date.now() + Math.min(Math.max(1, days), MAX_GRACE_DAYS) * 86_400_000).toLocaleDateString()}</strong>,
-                  access is disconnected automatically.
-                </p>
-              </div>
               <p className="text-xs text-muted-foreground">
-                1. Bank එකට {formatLKR(selected.price_lkr)} deposit කරන්න → 2. පහළ button එකෙන් order එක place වෙලා WhatsApp open වෙනවා →
-                3. Slip photo එක attach කරලා send කරන්න → Admin verify කරලා 30 days access activate කරනවා.
+                1. "Activate" කරාම ඔබට config එකක් reserve වෙනවා → 2. Bank එකට {formatLKR(selected.price_lkr)} deposit කරන්න →
+                3. Slip එක upload කරන්න හෝ WhatsApp එකෙන් එවන්න → Admin approve කළාම config එක 30 days activate වෙනවා.
               </p>
             </div>
           )}
@@ -390,24 +431,32 @@ function PlansPage() {
             <div className="space-y-4 text-center">
               <BadgeCheck className="mx-auto h-12 w-12 text-success" />
               <p className="text-sm text-muted-foreground">
-                Order <span className="font-mono text-foreground">{orderId?.slice(0, 8)}…</span> placed.
-                WhatsApp එකේ slip එක එවූ විට admin confirm කරලා{" "}
-                {payBy && <strong className="text-foreground">{payBy.toLocaleDateString()}</strong>} ට පෙර
-                ඔබේ 30-day access activate කරනවා.
+                Order <span className="font-mono text-foreground">{orderId?.slice(0, 8)}…</span> created.{" "}
+                {gotConfig
+                  ? `${isp} config එකක් ඔබට reserve කළා — payment approve වුණාම configs page එකේ පේනවා.`
+                  : `${isp} pool එකේ දැනට free config එකක් නැහැ — admin එකක් add කරලා ඔබට assign කරයි.`}
               </p>
+              {orderId && user && (
+                <SlipUpload
+                  subscriptionId={orderId}
+                  userId={user.id}
+                  onUploaded={() => void loadPayments()}
+                />
+              )}
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={() => {
-                  if (!selected || !payBy) return;
+                  if (!selected || !orderId) return;
                   window.open(
                     whatsappLink(slipMessage({
-                      orderId: orderId ?? "—",
+                      orderId,
                       planName: selected.name,
                       price: selected.price_lkr,
                       name: name.trim(),
                       email: email.trim(),
-                      payBy,
+                      isp,
+                      simPackage,
                     })),
                     "_blank",
                     "noopener,noreferrer",
@@ -415,7 +464,7 @@ function PlansPage() {
                 }}
               >
                 <WhatsAppIcon className="mr-1.5 h-4 w-4 text-[#25D366]" />
-                WhatsApp open වුණේ නැද්ද? නැවත open කරන්න
+                Send the slip on WhatsApp instead
               </Button>
             </div>
           )}
@@ -434,15 +483,15 @@ function PlansPage() {
                 <Button variant="outline" onClick={() => setStep("details")}>
                   <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
                 </Button>
-                <Button onClick={placeOrder} disabled={busy} className="bg-[#25D366] text-white hover:bg-[#1ebe5d]">
-                  <WhatsAppIcon className="mr-1.5 h-4 w-4" />
-                  {busy ? "Placing order…" : "Pay & send slip on WhatsApp"}
+                <Button onClick={activate} disabled={busy} className="bg-gradient-primary text-primary-foreground">
+                  <Zap className="mr-1.5 h-4 w-4" />
+                  {busy ? "Activating…" : "Activate package"}
                 </Button>
               </>
             )}
             {step === "done" && (
               <Button asChild className="bg-gradient-primary text-primary-foreground">
-                <Link to="/configs" onClick={closeWizard}>Go to configs</Link>
+                <Link to="/configs" onClick={closeWizard}>Go to my configs</Link>
               </Button>
             )}
           </DialogFooter>
