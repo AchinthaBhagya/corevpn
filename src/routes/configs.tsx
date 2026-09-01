@@ -35,6 +35,7 @@ function Configs() {
 
   const unlocked = Boolean(profile?.is_premium) || hasPlanAccess;
   const [configs, setConfigs] = useState<Config[]>([]);
+  const [myConfig, setMyConfig] = useState<Config | null>(null);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [ispFilter, setIspFilter] = useState<string>("all");
@@ -49,6 +50,15 @@ function Configs() {
       setBusy(false);
     });
   }, [user]);
+
+  useEffect(() => {
+    const cid = subscription?.config_id;
+    if (!user || !cid) { setMyConfig(null); return; }
+    supabase.from("configs").select("*").eq("id", cid).maybeSingle().then(({ data }) => {
+      setMyConfig((data as Config | null) ?? null);
+    });
+  }, [user, subscription?.config_id]);
+
 
   const isps = useMemo(() => Array.from(new Set(configs.map((c) => c.isp))), [configs]);
   const filtered = useMemo(
@@ -139,6 +149,42 @@ function Configs() {
           </Button>
         </div>
       )}
+
+      {myConfig && (
+        <section className="mb-8 rounded-2xl border border-primary/40 bg-primary/5 p-5 shadow-card">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Your package config • {myConfig.isp} • {myConfig.package_name}
+              </div>
+              <h2 className="mt-1 font-display text-xl font-bold">{myConfig.config_name}</h2>
+            </div>
+            <Badge className={subscription?.is_paid ? "bg-primary text-primary-foreground" : "bg-warning text-warning-foreground"}>
+              {subscription?.is_paid ? "Active" : "Pending payment approval"}
+            </Badge>
+          </div>
+          {subscription?.is_paid ? (
+            <>
+              <div className="mt-3 truncate rounded-lg bg-muted/60 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                {myConfig.config_data.slice(0, 70)}…
+              </div>
+              <Button size="sm" className="mt-4 bg-gradient-primary text-primary-foreground" onClick={() => handleCopy(myConfig)}>
+                <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy my config
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 text-sm text-muted-foreground">
+                මේ config එක ඔබට reserve කරලා තියෙනවා. Bank slip එක upload කරලා admin approve කළාම මෙතනින් copy කරගන්න පුළුවන්.
+              </p>
+              <Button size="sm" asChild className="mt-4 bg-gradient-primary text-primary-foreground">
+                <Link to="/plans">Upload payment slip</Link>
+              </Button>
+            </>
+          )}
+        </section>
+      )}
+
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="font-display text-3xl font-bold md:text-4xl">All Configs</h1>
