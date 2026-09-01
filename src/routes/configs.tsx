@@ -35,6 +35,7 @@ function Configs() {
 
   const unlocked = Boolean(profile?.is_premium) || hasPlanAccess;
   const [configs, setConfigs] = useState<Config[]>([]);
+  const [myConfig, setMyConfig] = useState<Config | null>(null);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [ispFilter, setIspFilter] = useState<string>("all");
@@ -49,6 +50,15 @@ function Configs() {
       setBusy(false);
     });
   }, [user]);
+
+  useEffect(() => {
+    const cid = subscription?.config_id;
+    if (!user || !cid) { setMyConfig(null); return; }
+    supabase.from("configs").select("*").eq("id", cid).maybeSingle().then(({ data }) => {
+      setMyConfig((data as Config | null) ?? null);
+    });
+  }, [user, subscription?.config_id]);
+
 
   const isps = useMemo(() => Array.from(new Set(configs.map((c) => c.isp))), [configs]);
   const filtered = useMemo(
