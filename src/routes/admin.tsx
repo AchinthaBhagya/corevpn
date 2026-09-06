@@ -467,6 +467,80 @@ function AdminPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="payments" className="mt-4">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="p-3">Customer</th>
+                    <th className="p-3">Package</th>
+                    <th className="p-3">Submitted</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.length === 0 && (
+                    <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No payment slips yet.</td></tr>
+                  )}
+                  {payments.map((p) => {
+                    const sub = subs.find((s) => s.id === p.subscription_id);
+                    const usr = users.find((u) => u.id === p.user_id);
+                    return (
+                      <tr key={p.id} className="border-t border-border/60">
+                        <td className="p-3">
+                          <div className="font-medium">{sub?.customer_name ?? usr?.display_name ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground">{usr?.email ?? p.user_id.slice(0, 8)}</div>
+                          {sub?.customer_whatsapp && (
+                            <div className="text-xs text-muted-foreground">WA: {sub.customer_whatsapp}</div>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <div className="capitalize">{sub ? `${sub.plan_tier} — ${formatLKR(sub.price_lkr)}` : "—"}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {sub?.isp ?? "—"}{sub?.sim_package ? ` • ${sub.sim_package}` : ""}
+                          </div>
+                        </td>
+                        <td className="p-3 text-xs text-muted-foreground">
+                          {new Date(p.created_at).toLocaleString()}
+                        </td>
+                        <td className="p-3">
+                          <Badge
+                            className={
+                              p.status === "approved" ? "bg-primary text-primary-foreground"
+                                : p.status === "rejected" ? "bg-destructive text-destructive-foreground"
+                                  : "bg-warning text-warning-foreground"
+                            }
+                          >
+                            {p.status}
+                          </Badge>
+                          {p.note && <div className="mt-1 text-xs text-muted-foreground">{p.note}</div>}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button size="sm" variant="outline" onClick={() => void viewSlip(p.slip_path)}>
+                              View slip
+                            </Button>
+                            {p.status !== "approved" && (
+                              <Button size="sm" onClick={() => void approvePayment(p)}>Approve (30 days)</Button>
+                            )}
+                            {p.status === "pending" && (
+                              <Button size="sm" variant="outline" onClick={() => void rejectPayment(p)}>Reject</Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
+
+
         <TabsContent value="logs" className="mt-4">
 
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
