@@ -570,6 +570,15 @@ function AdminPage() {
                             <Button size="sm" variant="outline" onClick={() => void viewSlip(p.slip_path)}>
                               View slip
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openSendConfig(p)}
+                              title={sub?.config_id ? "Replace the config assigned to this customer" : "Upload a config for this customer"}
+                            >
+                              <Send className="mr-1 h-3.5 w-3.5" />
+                              {sub?.config_id ? "Replace config" : "Send config"}
+                            </Button>
                             {p.status !== "approved" && (
                               <Button size="sm" onClick={() => void approvePayment(p)}>Approve (30 days)</Button>
                             )}
