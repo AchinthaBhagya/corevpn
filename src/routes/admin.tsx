@@ -677,6 +677,42 @@ function AdminPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Send config to paying customer */}
+      <Dialog open={sendTarget !== null} onOpenChange={(v) => { if (!v) setSendTarget(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Send config to customer</DialogTitle>
+          </DialogHeader>
+          {sendTarget && (
+            <div className="space-y-3">
+              <div className="rounded-xl bg-muted/40 p-3 text-sm">
+                <div className="font-medium">{sendTarget.sub.customer_name ?? users.find((u) => u.id === sendTarget.payment.user_id)?.email ?? "Customer"}</div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {sendTarget.sub.plan_tier} — {formatLKR(sendTarget.sub.price_lkr)} • {sendTarget.sub.isp ?? "—"}{sendTarget.sub.sim_package ? ` • ${sendTarget.sub.sim_package}` : ""}
+                </div>
+                {sendTarget.sub.config_id && (
+                  <div className="mt-1 text-xs text-warning-foreground">This customer already has a config — sending will replace it.</div>
+                )}
+              </div>
+              <div>
+                <Label>Config name *</Label>
+                <Input value={sendForm.config_name} onChange={(e) => setSendForm({ ...sendForm, config_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>VLESS config (vless://...) *</Label>
+                <Textarea rows={5} value={sendForm.config_data} onChange={(e) => setSendForm({ ...sendForm, config_data: e.target.value })} placeholder="vless://uuid@host:443?..." className="font-mono text-xs" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSendTarget(null)}><X className="mr-1 h-4 w-4" />Cancel</Button>
+            <Button onClick={() => void sendConfig()} disabled={sending} className="bg-gradient-primary text-primary-foreground">
+              <Send className="mr-1 h-4 w-4" />{sending ? "Sending..." : "Send to customer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
