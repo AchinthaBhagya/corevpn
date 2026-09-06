@@ -69,6 +69,11 @@ function AdminPage() {
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
 
+  // "Send config to paying customer" dialog
+  const [sendTarget, setSendTarget] = useState<{ payment: PaymentRow; sub: SubRow } | null>(null);
+  const [sendForm, setSendForm] = useState({ config_name: "", config_data: "" });
+  const [sending, setSending] = useState(false);
+
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate({ to: "/" });
   }, [user, isAdmin, loading, navigate]);
@@ -113,6 +118,49 @@ function AdminPage() {
     const { error } = await supabase.rpc("reject_payment", { _payment_id: p.id, _note: note });
     if (error) { toast.error(error.message); return; }
     toast.success("Payment rejected");
+    void load();
+  };
+
+  const openSendConfig = (p: PaymentRow) => {
+    const sub = subs.find((s) => s.id === p.subscription_id);
+    if (!sub) { toast.error("Subscription not found"); return; }
+    setSendTarget({ payment: p, sub });
+    setSendForm({
+      config_name: `${sub.isp ?? "ISP"} — ${sub.sim_package ?? sub.plan_tier}`,
+      config_data: "",
+    });
+  };
+
+  const sendConfig = async () => {
+    if (!sendTarget) return;
+    if (!sendForm.config_data.trim() || !sendForm.config_name.trim()) {
+      toast.error("Please enter a config name and the VLESS config");
+      return;
+    }
+    setSending(true);
+    const { payment, sub } = sendTarget;
+    const { data: created, error: insErr } = await supabase.from("configs").insert({
+      isp: sub.isp ?? "Dialog",
+      package_name: sub.sim_package ?? sub.plan_tier,
+      config_name: sendForm.config_name.trim(),
+      config_data: sendForm.config_data.trim(),
+      is_active: true,
+      is_assigned: true,
+      assigned_to: payment.user_id,
+      assigned_at: new Date().toISOString(),
+      created_by: user!.id,
+    }).select("id").single();
+    if (insErr || !created) {
+      setSending(false);
+      toast.error(insErr?.message ?? "Couldn't save config");
+      return;
+    }
+    const { error: updErr } = await supabase.from("subscriptions")
+      .update({ config_id: created.id }).eq("id", sub.id);
+    setSending(false);
+    if (updErr) { toast.error(updErr.message); return; }
+    toast.success("Config sent — customer can now see it on their dashboard");
+    setSendTarget(null);
     void load();
   };
 
