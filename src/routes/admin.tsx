@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Activity, Database, Users, Shield, X, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -69,6 +70,11 @@ function AdminPage() {
   const [editing, setEditing] = useState<Config | null>(null);
   const [form, setForm] = useState(empty);
 
+  // "Send config to paying customer" dialog
+  const [sendTarget, setSendTarget] = useState<{ payment: PaymentRow; sub: SubRow } | null>(null);
+  const [sendForm, setSendForm] = useState({ config_name: "", config_data: "" });
+  const [sending, setSending] = useState(false);
+
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate({ to: "/" });
   }, [user, isAdmin, loading, navigate]);
@@ -113,6 +119,49 @@ function AdminPage() {
     const { error } = await supabase.rpc("reject_payment", { _payment_id: p.id, _note: note });
     if (error) { toast.error(error.message); return; }
     toast.success("Payment rejected");
+    void load();
+  };
+
+  const openSendConfig = (p: PaymentRow) => {
+    const sub = subs.find((s) => s.id === p.subscription_id);
+    if (!sub) { toast.error("Subscription not found"); return; }
+    setSendTarget({ payment: p, sub });
+    setSendForm({
+      config_name: `${sub.isp ?? "ISP"} — ${sub.sim_package ?? sub.plan_tier}`,
+      config_data: "",
+    });
+  };
+
+  const sendConfig = async () => {
+    if (!sendTarget) return;
+    if (!sendForm.config_data.trim() || !sendForm.config_name.trim()) {
+      toast.error("Please enter a config name and the VLESS config");
+      return;
+    }
+    setSending(true);
+    const { payment, sub } = sendTarget;
+    const { data: created, error: insErr } = await supabase.from("configs").insert({
+      isp: sub.isp ?? "Dialog",
+      package_name: sub.sim_package ?? sub.plan_tier,
+      config_name: sendForm.config_name.trim(),
+      config_data: sendForm.config_data.trim(),
+      is_active: true,
+      is_assigned: true,
+      assigned_to: payment.user_id,
+      assigned_at: new Date().toISOString(),
+      created_by: user!.id,
+    }).select("id").single();
+    if (insErr || !created) {
+      setSending(false);
+      toast.error(insErr?.message ?? "Couldn't save config");
+      return;
+    }
+    const { error: updErr } = await supabase.from("subscriptions")
+      .update({ config_id: created.id }).eq("id", sub.id);
+    setSending(false);
+    if (updErr) { toast.error(updErr.message); return; }
+    toast.success("Config sent — customer can now see it on their dashboard");
+    setSendTarget(null);
     void load();
   };
 
@@ -522,6 +571,15 @@ function AdminPage() {
                             <Button size="sm" variant="outline" onClick={() => void viewSlip(p.slip_path)}>
                               View slip
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openSendConfig(p)}
+                              title={sub?.config_id ? "Replace the config assigned to this customer" : "Upload a config for this customer"}
+                            >
+                              <Send className="mr-1 h-3.5 w-3.5" />
+                              {sub?.config_id ? "Replace config" : "Send config"}
+                            </Button>
                             {p.status !== "approved" && (
                               <Button size="sm" onClick={() => void approvePayment(p)}>Approve (30 days)</Button>
                             )}
@@ -616,6 +674,42 @@ function AdminPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}><X className="mr-1 h-4 w-4" />Cancel</Button>
             <Button onClick={save} className="bg-gradient-primary text-primary-foreground">{editing ? "Save changes" : "Create config"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send config to paying customer */}
+      <Dialog open={sendTarget !== null} onOpenChange={(v) => { if (!v) setSendTarget(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Send config to customer</DialogTitle>
+          </DialogHeader>
+          {sendTarget && (
+            <div className="space-y-3">
+              <div className="rounded-xl bg-muted/40 p-3 text-sm">
+                <div className="font-medium">{sendTarget.sub.customer_name ?? users.find((u) => u.id === sendTarget.payment.user_id)?.email ?? "Customer"}</div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {sendTarget.sub.plan_tier} — {formatLKR(sendTarget.sub.price_lkr)} • {sendTarget.sub.isp ?? "—"}{sendTarget.sub.sim_package ? ` • ${sendTarget.sub.sim_package}` : ""}
+                </div>
+                {sendTarget.sub.config_id && (
+                  <div className="mt-1 text-xs text-warning-foreground">This customer already has a config — sending will replace it.</div>
+                )}
+              </div>
+              <div>
+                <Label>Config name *</Label>
+                <Input value={sendForm.config_name} onChange={(e) => setSendForm({ ...sendForm, config_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>VLESS config (vless://...) *</Label>
+                <Textarea rows={5} value={sendForm.config_data} onChange={(e) => setSendForm({ ...sendForm, config_data: e.target.value })} placeholder="vless://uuid@host:443?..." className="font-mono text-xs" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSendTarget(null)}><X className="mr-1 h-4 w-4" />Cancel</Button>
+            <Button onClick={() => void sendConfig()} disabled={sending} className="bg-gradient-primary text-primary-foreground">
+              <Send className="mr-1 h-4 w-4" />{sending ? "Sending..." : "Send to customer"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
