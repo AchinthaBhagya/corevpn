@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { formatLKR, subscriptionStatus, type Subscription } from "@/lib/plans";
+import { formatLKR, subscriptionStatus, type Subscription, type PaymentRow } from "@/lib/plans";
 
 
 export const Route = createFileRoute("/admin")({
