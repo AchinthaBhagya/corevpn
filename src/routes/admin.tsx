@@ -74,19 +74,48 @@ function AdminPage() {
   }, [user, isAdmin, loading, navigate]);
 
   const load = async () => {
-    const [c, l, u, s, r] = await Promise.all([
+    const [c, l, u, s, r, p] = await Promise.all([
       supabase.from("configs").select("*").order("created_at", { ascending: false }),
       supabase.from("access_logs").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("profiles").select("id,email,display_name,is_premium,created_at").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role").eq("role", "admin"),
+      supabase.from("payments").select("*").order("created_at", { ascending: false }),
     ]);
     if (c.data) setConfigs(c.data as Config[]);
     if (l.data) setLogs(l.data as LogRow[]);
     if (u.data) setUsers(u.data as UserRow[]);
     if (s.data) setSubs(s.data as SubRow[]);
     if (r.data) setAdminIds(new Set((r.data as { user_id: string }[]).map((x) => x.user_id)));
+    if (p.data) setPayments(p.data as PaymentRow[]);
   };
+
+  const viewSlip = async (path: string | null) => {
+    if (!path) { toast.error("No slip file uploaded for this payment"); return; }
+    const { data, error } = await supabase.storage.from("slips").createSignedUrl(path, 300);
+    if (error || !data) { toast.error(error?.message ?? "Couldn't open slip"); return; }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const approvePayment = async (p: PaymentRow) => {
+    const { error } = await supabase.rpc("approve_payment", {
+      _subscription_id: p.subscription_id,
+      _payment_id: p.id,
+    });
+    if (error) { toast.error(error.message); return; }
+    void notifyPayment({ data: { subscriptionId: p.subscription_id } });
+    toast.success("Payment approved — config active for 30 days");
+    void load();
+  };
+
+  const rejectPayment = async (p: PaymentRow) => {
+    const note = prompt("Reason for rejecting this slip?", "Slip unclear") ?? undefined;
+    const { error } = await supabase.rpc("reject_payment", { _payment_id: p.id, _note: note ?? null });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Payment rejected");
+    void load();
+  };
+
 
 
   const runWebhookTest = async (channel: "user" | "config" | "order") => {
