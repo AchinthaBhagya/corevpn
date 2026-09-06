@@ -110,7 +110,7 @@ function AdminPage() {
 
   const rejectPayment = async (p: PaymentRow) => {
     const note = prompt("Reason for rejecting this slip?", "Slip unclear") ?? undefined;
-    const { error } = await supabase.rpc("reject_payment", { _payment_id: p.id, _note: note ?? null });
+    const { error } = await supabase.rpc("reject_payment", { _payment_id: p.id, _note: note });
     if (error) { toast.error(error.message); return; }
     toast.success("Payment rejected");
     void load();
