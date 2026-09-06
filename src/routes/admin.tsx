@@ -315,6 +315,10 @@ function AdminPage() {
           <TabsTrigger value="configs">Configs</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="subs">Subscriptions</TabsTrigger>
+          <TabsTrigger value="payments">
+            Payments{payments.some((p) => p.status === "pending") ? ` (${payments.filter((p) => p.status === "pending").length})` : ""}
+          </TabsTrigger>
+
           <TabsTrigger value="logs">Activity Logs</TabsTrigger>
 
         </TabsList>
