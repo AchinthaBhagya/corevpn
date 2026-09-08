@@ -156,12 +156,24 @@ function AdminPage() {
       toast.error(insErr?.message ?? "Couldn't save config");
       return;
     }
+    const previousId = sub.config_id;
     const { error: updErr } = await supabase.from("subscriptions")
       .update({ config_id: created.id }).eq("id", sub.id);
+    if (updErr) {
+      setSending(false);
+      toast.error(updErr.message);
+      return;
+    }
+    // Retire the config this customer had before, so it isn't left assigned to them.
+    if (previousId && previousId !== created.id) {
+      await supabase.from("configs")
+        .update({ is_active: false, is_assigned: false, assigned_to: null })
+        .eq("id", previousId);
+    }
     setSending(false);
-    if (updErr) { toast.error(updErr.message); return; }
     toast.success("Config sent — customer can now see it on their dashboard");
     setSendTarget(null);
+    setSendForm({ config_name: "", config_data: "" });
     void load();
   };
 

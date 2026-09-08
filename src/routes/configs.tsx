@@ -44,7 +44,7 @@ function Configs() {
   useEffect(() => {
     if (!user) return;
     setBusy(true);
-    supabase.from("configs").select("*").order("isp").order("package_name").then(({ data, error }) => {
+    supabase.from("configs").select("*").eq("is_assigned", false).order("isp").order("package_name").then(({ data, error }) => {
       if (error) toast.error(error.message);
       setConfigs((data ?? []) as Config[]);
       setBusy(false);
