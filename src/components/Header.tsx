@@ -41,18 +41,19 @@ export function Header() {
           <span>core<span className="text-gradient">VPN</span></span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {nav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "bg-accent text-foreground" }}
+              className="relative rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:origin-right after:scale-x-0 after:bg-gradient-neon after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+              activeProps={{ className: "text-foreground after:scale-x-100" }}
             >
               {n.label}
             </Link>
           ))}
         </nav>
+
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
