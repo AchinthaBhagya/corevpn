@@ -104,14 +104,14 @@ export function Header() {
             </div>
           )}
 
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((v) => !v)}>
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
       </div>
 
       {open && (
-        <div className="border-t border-border/60 bg-background md:hidden">
+        <div className="border-t border-border/60 bg-background lg:hidden">
           <div className="container mx-auto flex flex-col p-2">
             {nav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
