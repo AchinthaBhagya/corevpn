@@ -11,11 +11,13 @@ import {
 
 const nav = [
   { to: "/", label: "Home" },
+  { to: "/v2ray", label: "V2Ray" },
   { to: "/info", label: "Info" },
   { to: "/setup", label: "Setup" },
   { to: "/configs", label: "Free Configs" },
   { to: "/plans", label: "Plans" },
 ] as const;
+
 
 
 export function Header() {
@@ -39,18 +41,19 @@ export function Header() {
           <span>core<span className="text-gradient">VPN</span></span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {nav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "bg-accent text-foreground" }}
+              className="relative rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:origin-right after:scale-x-0 after:bg-gradient-neon after:transition-transform after:duration-300 hover:after:origin-left hover:after:scale-x-100"
+              activeProps={{ className: "text-foreground after:scale-x-100" }}
             >
               {n.label}
             </Link>
           ))}
         </nav>
+
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
@@ -101,14 +104,14 @@ export function Header() {
             </div>
           )}
 
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((v) => !v)}>
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
       </div>
 
       {open && (
-        <div className="border-t border-border/60 bg-background md:hidden">
+        <div className="border-t border-border/60 bg-background lg:hidden">
           <div className="container mx-auto flex flex-col p-2">
             {nav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
