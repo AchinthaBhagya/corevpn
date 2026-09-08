@@ -11,11 +11,13 @@ import {
 
 const nav = [
   { to: "/", label: "Home" },
+  { to: "/v2ray", label: "V2Ray" },
   { to: "/info", label: "Info" },
   { to: "/setup", label: "Setup" },
   { to: "/configs", label: "Free Configs" },
   { to: "/plans", label: "Plans" },
 ] as const;
+
 
 
 export function Header() {
