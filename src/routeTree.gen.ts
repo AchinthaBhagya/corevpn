@@ -17,6 +17,7 @@ import { Route as InfoRouteImport } from './routes/info'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as V2rayRouteImport } from './routes/v2ray'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const SetupRoute = SetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V2rayRoute = V2rayRouteImport.update({
+  id: '/v2ray',
+  path: '/v2ray',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
+  '/v2ray': typeof V2rayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
+  '/v2ray': typeof V2rayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/plans': typeof PlansRoute
   '/profile': typeof ProfileRoute
   '/setup': typeof SetupRoute
+  '/v2ray': typeof V2rayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/profile'
     | '/setup'
+    | '/v2ray'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/profile'
     | '/setup'
+    | '/v2ray'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/profile'
     | '/setup'
+    | '/v2ray'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   PlansRoute: typeof PlansRoute
   ProfileRoute: typeof ProfileRoute
   SetupRoute: typeof SetupRoute
+  V2rayRoute: typeof V2rayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v2ray': {
+      id: '/v2ray'
+      path: '/v2ray'
+      fullPath: '/v2ray'
+      preLoaderRoute: typeof V2rayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlansRoute: PlansRoute,
   ProfileRoute: ProfileRoute,
   SetupRoute: SetupRoute,
+  V2rayRoute: V2rayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
