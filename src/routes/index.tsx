@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ISPS } from "@/lib/plans";
+import { IspLogo } from "@/components/IspLogo";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -95,7 +96,7 @@ function Home() {
                 return (
                   <div
                     key={isp}
-                    className="absolute animate-float rounded-2xl border border-border/70 bg-card/80 px-4 py-2 font-display text-xs font-bold uppercase tracking-wider backdrop-blur"
+                    className="absolute animate-float rounded-2xl border border-border/70 bg-card/80 p-2 backdrop-blur"
                     style={{
                       left: `calc(50% + ${Math.cos(angle) * r}px)`,
                       top: `calc(50% + ${Math.sin(angle) * r}px)`,
@@ -103,7 +104,7 @@ function Home() {
                       animationDelay: `${i * 0.4}s`,
                     }}
                   >
-                    {isp}
+                    <IspLogo isp={isp} />
                   </div>
                 );
               })}

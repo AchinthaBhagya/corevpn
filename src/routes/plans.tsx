@@ -368,7 +368,14 @@ function PlansPage() {
                   <Select value={isp} onValueChange={setIsp}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {ISPS.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                      {ISPS.map((i) => (
+                        <SelectItem key={i} value={i}>
+                          <span className="flex items-center gap-2">
+                            <IspLogo isp={i} className="h-6 w-10 rounded" />
+                            {i}
+                          </span>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
