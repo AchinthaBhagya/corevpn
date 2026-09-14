@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowRight, Check, Clock, Server, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ISPS, type Isp, formatLKR } from "@/lib/plans";
+import { IspLogo } from "@/components/IspLogo";
 
 export const Route = createFileRoute("/v2ray")({
   component: V2RayPage,
@@ -82,18 +83,19 @@ function V2RayPage() {
 
       {/* ISP switcher */}
       <div className="container mx-auto px-4">
-        <div className="mx-auto -mt-6 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-border/70 bg-card/80 p-1.5 backdrop-blur">
+        <div className="mx-auto -mt-6 flex w-fit max-w-full flex-wrap justify-center gap-2 rounded-3xl border border-border/70 bg-card/80 p-2 backdrop-blur">
           {ISPS.map((i) => (
             <button
               key={i}
               onClick={() => setIsp(i)}
-              className={`rounded-full px-4 py-2 font-display text-xs font-bold uppercase tracking-wider transition-all ${
+              aria-label={i}
+              className={`rounded-2xl p-1.5 transition-all ${
                 isp === i
-                  ? "bg-gradient-primary text-primary-foreground shadow-glow"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "ring-2 ring-primary shadow-glow"
+                  : "opacity-70 hover:opacity-100"
               }`}
             >
-              {i}
+              <IspLogo isp={i} className="h-10 w-20" />
             </button>
           ))}
         </div>
