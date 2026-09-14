@@ -22,6 +22,7 @@ import {
   subscriptionStatus, daysLeft, whatsappLink, BANK_DETAILS,
   type Plan, type PaymentRow,
 } from "@/lib/plans";
+import { IspLogo } from "@/components/IspLogo";
 
 export const Route = createFileRoute("/plans")({
   component: PlansPage,
