@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: "Space Grotesk", "JetBrains Mono", ui-sans-serif, sans-serif;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
 
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -51,7 +51,7 @@
 
 /* Light mode (default) */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
   --background: oklch(0.99 0.005 250);
   --foreground: oklch(0.18 0.04 250);
@@ -62,9 +62,9 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.04 250);
 
-  --primary: oklch(0.52 0.20 255);
+  --primary: oklch(0.66 0.18 235);
   --primary-foreground: oklch(0.99 0.005 250);
-  --primary-glow: oklch(0.68 0.16 220);
+  --primary-glow: oklch(0.79 0.14 205);
 
   --secondary: oklch(0.96 0.015 250);
   --secondary-foreground: oklch(0.22 0.06 250);
@@ -72,8 +72,8 @@
   --muted: oklch(0.96 0.012 250);
   --muted-foreground: oklch(0.50 0.03 250);
 
-  --accent: oklch(0.93 0.05 255);
-  --accent-foreground: oklch(0.25 0.10 255);
+  --accent: oklch(0.93 0.05 225);
+  --accent-foreground: oklch(0.25 0.10 235);
 
   --destructive: oklch(0.58 0.24 27);
   --destructive-foreground: oklch(0.99 0 0);
@@ -86,7 +86,7 @@
 
   --border: oklch(0.90 0.015 250);
   --input: oklch(0.92 0.012 250);
-  --ring: oklch(0.52 0.20 255);
+  --ring: oklch(0.66 0.18 235);
 
   --sidebar: oklch(0.98 0.01 250);
   --sidebar-foreground: oklch(0.18 0.04 250);
@@ -97,34 +97,35 @@
   --sidebar-border: oklch(0.90 0.015 250);
   --sidebar-ring: oklch(0.52 0.20 255);
 
-  --gradient-hero: radial-gradient(ellipse at top, oklch(0.93 0.05 255) 0%, oklch(0.99 0.005 250) 60%);
-  --gradient-primary: linear-gradient(135deg, oklch(0.52 0.20 255), oklch(0.62 0.18 230));
-  --shadow-glow: 0 20px 60px -20px oklch(0.52 0.20 255 / 0.35);
+  --gradient-hero: linear-gradient(180deg, oklch(0.97 0.025 225) 0%, oklch(0.99 0.005 250) 72%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.66 0.18 235), oklch(0.79 0.14 205));
+  --gradient-neon: linear-gradient(90deg, oklch(0.79 0.14 205), oklch(0.66 0.18 235));
+  --shadow-glow: 0 18px 50px -20px oklch(0.66 0.18 235 / 0.42);
   --shadow-card: 0 1px 2px oklch(0.20 0.04 250 / 0.05), 0 8px 24px -8px oklch(0.20 0.04 250 / 0.08);
 }
 
 /* Dark mode — Neon Midnight (blue) */
 .dark {
-  --background: oklch(0.10 0.012 245);
+  --background: oklch(0.105 0.015 240);
   --foreground: oklch(0.97 0.005 245);
 
-  --card: oklch(0.15 0.018 245);
+  --card: oklch(0.155 0.025 235);
   --card-foreground: oklch(0.97 0.005 245);
 
-  --popover: oklch(0.14 0.018 245);
+  --popover: oklch(0.14 0.022 235);
   --popover-foreground: oklch(0.97 0.005 245);
 
-  --primary: oklch(0.64 0.20 250);
-  --primary-foreground: oklch(0.12 0.02 250);
-  --primary-glow: oklch(0.78 0.14 215);
+  --primary: oklch(0.70 0.17 235);
+  --primary-foreground: oklch(0.105 0.015 240);
+  --primary-glow: oklch(0.82 0.14 205);
 
-  --secondary: oklch(0.20 0.022 245);
+  --secondary: oklch(0.20 0.028 235);
   --secondary-foreground: oklch(0.97 0.005 245);
 
-  --muted: oklch(0.18 0.02 245);
-  --muted-foreground: oklch(0.70 0.02 245);
+  --muted: oklch(0.18 0.024 235);
+  --muted-foreground: oklch(0.72 0.025 230);
 
-  --accent: oklch(0.27 0.08 245);
+  --accent: oklch(0.25 0.075 230);
   --accent-foreground: oklch(0.97 0.005 245);
 
   --destructive: oklch(0.62 0.24 27);
@@ -136,9 +137,9 @@
   --warning: oklch(0.80 0.16 80);
   --warning-foreground: oklch(0.15 0.05 80);
 
-  --border: oklch(0.25 0.025 245);
-  --input: oklch(0.21 0.022 245);
-  --ring: oklch(0.64 0.20 250);
+  --border: oklch(0.28 0.035 230);
+  --input: oklch(0.21 0.03 235);
+  --ring: oklch(0.70 0.17 235);
 
   --sidebar: oklch(0.12 0.015 245);
   --sidebar-foreground: oklch(0.97 0.005 245);
@@ -149,13 +150,10 @@
   --sidebar-border: oklch(0.25 0.025 245);
   --sidebar-ring: oklch(0.64 0.20 250);
 
-  --gradient-hero:
-    radial-gradient(60% 60% at 20% 0%, oklch(0.34 0.14 250 / 0.50) 0%, transparent 70%),
-    radial-gradient(50% 50% at 90% 10%, oklch(0.40 0.10 215 / 0.38) 0%, transparent 70%),
-    linear-gradient(180deg, oklch(0.13 0.02 245) 0%, oklch(0.10 0.012 245) 100%);
-  --gradient-primary: linear-gradient(120deg, oklch(0.64 0.20 250), oklch(0.58 0.18 230));
-  --gradient-neon: linear-gradient(90deg, oklch(0.82 0.14 195), oklch(0.64 0.20 250));
-  --shadow-glow: 0 0 0 1px oklch(0.64 0.20 250 / 0.22), 0 20px 70px -25px oklch(0.64 0.20 250 / 0.60);
+  --gradient-hero: linear-gradient(180deg, oklch(0.14 0.035 235) 0%, oklch(0.105 0.015 240) 68%);
+  --gradient-primary: linear-gradient(120deg, oklch(0.70 0.17 235), oklch(0.82 0.14 205));
+  --gradient-neon: linear-gradient(90deg, oklch(0.82 0.14 205), oklch(0.70 0.17 235));
+  --shadow-glow: 0 0 0 1px oklch(0.70 0.17 235 / 0.2), 0 20px 60px -26px oklch(0.70 0.17 235 / 0.62);
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.4), 0 12px 40px -16px oklch(0 0 0 / 0.7);
 }
 
@@ -168,7 +166,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0; }
   code, pre, .font-mono { font-family: var(--font-mono); }
 }
 
@@ -231,6 +229,23 @@
     border-color: color-mix(in oklab, var(--color-primary) 55%, transparent);
     box-shadow: var(--shadow-glow);
   }
+}
+
+@utility glass-panel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklab, var(--color-border) 78%, transparent);
+  background: color-mix(in oklab, var(--color-card) 78%, transparent);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+  &:hover {
+    border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-border));
+  }
+}
+
+@utility bento-lift {
+  &:hover { transform: translateY(-3px); }
 }
 
 @utility marquee-track {

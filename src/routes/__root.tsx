@@ -57,7 +57,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "coreVPN — Free VLESS Configs for Sri Lanka" },
       { property: "og:description", content: "Free VLESS VPN configurations for Dialog, Hutch, Mobitel, SLT and Airtel. Unlock 724 Zoom and social media packages." },
       { property: "og:type", content: "website" },
-      { name: "theme-color", content: "#4f46e5" },
+      { name: "theme-color", content: "#05080D" },
       { name: "twitter:title", content: "coreVPN — Free VLESS Configs for Sri Lanka" },
       { name: "twitter:description", content: "Free VLESS VPN configurations for Dialog, Hutch, Mobitel, SLT and Airtel. Unlock 724 Zoom and social media packages." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ace9612a-d3b8-424d-8a24-c20753600194" },
@@ -71,7 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
       },
     ],
 

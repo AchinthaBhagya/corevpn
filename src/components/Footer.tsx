@@ -21,7 +21,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/60 bg-background/60">
+    <footer className="border-t border-border/50 bg-card/20">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
         <div className="flex items-center gap-2 font-display font-semibold">
           <Shield className="h-4 w-4 text-primary" />
@@ -33,7 +33,7 @@ export function Footer() {
             href={whatsappContactLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/15 px-3 py-1.5 text-sm font-medium text-[#25D366] transition-colors hover:bg-[#25D366]/25"
+            className="inline-flex items-center gap-1.5 rounded-md bg-success/10 px-3 py-1.5 text-sm font-medium text-success transition-colors hover:bg-success/20"
           >
             <WhatsAppIcon className="h-4 w-4" />
             WhatsApp
@@ -42,7 +42,7 @@ export function Footer() {
             href={TELEGRAM_GROUP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#24A1DE]/15 px-3 py-1.5 text-sm font-medium text-[#24A1DE] transition-colors hover:bg-[#24A1DE]/25"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
           >
             <TelegramIcon className="h-4 w-4" />
             Join Telegram
