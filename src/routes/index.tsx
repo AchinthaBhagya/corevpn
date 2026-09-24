@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Zap, Lock, Globe, ArrowRight, CheckCircle2, ShieldCheck, Wifi, Server, Gauge,
+  Activity, Signal, CircleCheck, Clock3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ISPS } from "@/lib/plans";
@@ -20,184 +21,99 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const TICKER = [
-  "100% WORKING CONFIGS",
-  "INSTANT DELIVERY",
-  "ALL SRI LANKAN ISPS",
-  "NO SPEED LIMIT",
-  "24/7 SUPPORT",
-  "99.9% UPTIME",
-  "SECURE TLS TUNNEL",
-];
-
 function Home() {
   return (
-    <div className="overflow-x-hidden">
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-gradient-hero">
-        <div className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-        <div
-          className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full bg-primary/25 blur-[120px] animate-glow-pulse"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -right-24 top-40 h-80 w-80 rounded-full bg-primary-glow/20 blur-[130px] animate-glow-pulse"
-          aria-hidden
-        />
+    <div className="overflow-x-hidden bg-gradient-hero">
+      <section className="container mx-auto px-4 py-10 md:py-16">
+        <div className="mb-6 flex items-center justify-between border-b border-border/60 pb-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2"><span className="h-2 w-2 animate-pulse rounded-full bg-success" /> Network operational</span>
+          <span className="hidden items-center gap-2 sm:inline-flex"><Activity className="h-4 w-4 text-primary" /> Sri Lanka optimized VLESS</span>
+        </div>
 
-        <div className="container relative mx-auto px-4 py-24 md:py-32">
-          <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="animate-rise">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-                </span>
-                Sri Lanka's free VLESS config hub
-              </div>
-
-              <h1 className="mt-6 font-display text-4xl font-black uppercase leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-                Everything VLESS.
-                <br />
-                <span className="text-neon">One Trusted Core.</span>
-              </h1>
-
-              <p className="mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
-                Free configs and premium monthly plans tuned for Dialog, Hutch, Mobitel, SLT and
-                Airtel — unlock 724 Zoom and social media packages with a secure, fast tunnel.
-              </p>
-
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" asChild className="bg-gradient-primary text-primary-foreground shadow-glow">
-                  <Link to="/configs">Get Free Configs <ArrowRight className="ml-1 h-4 w-4" /></Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/v2ray">View V2Ray Plans</Link>
-                </Button>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Genuine configs</span>
-                <span className="inline-flex items-center gap-2"><Lock className="h-4 w-4 text-primary" />Secure checkout</span>
-                <span className="inline-flex items-center gap-2"><Gauge className="h-4 w-4 text-primary" />24/7 support</span>
-              </div>
+        <div className="grid auto-rows-min gap-4 lg:grid-cols-12">
+          <div className="glass-panel animate-rise p-7 md:p-10 lg:col-span-7 lg:row-span-2">
+            <div className="inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+              <ShieldCheck className="h-3.5 w-3.5" /> Secure tunnel ready
             </div>
-
-            {/* Floating ISP orbit */}
-            <div className="relative hidden h-[420px] lg:block">
-              <div className="absolute inset-8 rounded-full border border-border/60" />
-              <div className="absolute inset-20 rounded-full border border-border/40" />
-              <div className="absolute left-1/2 top-1/2 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-3xl bg-gradient-primary shadow-glow">
-                <Wifi className="h-12 w-12 text-primary-foreground" />
-              </div>
-              {ISPS.map((isp, i) => {
-                const angle = (i / ISPS.length) * Math.PI * 2 - Math.PI / 2;
-                const r = 168;
-                return (
-                  <div
-                    key={isp}
-                    className="absolute animate-float rounded-2xl border border-border/70 bg-card/80 p-2 backdrop-blur"
-                    style={{
-                      left: `calc(50% + ${Math.cos(angle) * r}px)`,
-                      top: `calc(50% + ${Math.sin(angle) * r}px)`,
-                      transform: "translate(-50%, -50%)",
-                      animationDelay: `${i * 0.4}s`,
-                    }}
-                  >
-                    <IspLogo isp={isp} />
-                  </div>
-                );
-              })}
+            <h1 className="mt-7 max-w-3xl font-display text-4xl font-extrabold leading-[1.08] sm:text-5xl md:text-6xl">
+              Everything VLESS.<br /><span className="text-neon">One trusted core.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+              Free configs and premium monthly plans tuned for Dialog, Hutch, Mobitel, SLT and Airtel — built for fast, secure access.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" asChild className="bg-gradient-primary text-primary-foreground shadow-glow">
+                <Link to="/configs">Get Free Configs <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild><Link to="/v2ray">Explore V2Ray Plans</Link></Button>
+            </div>
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 border-t border-border/50 pt-5 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2"><CircleCheck className="h-4 w-4 text-success" />Genuine configs</span>
+              <span className="inline-flex items-center gap-2"><Lock className="h-4 w-4 text-primary" />Secure access</span>
+              <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" />24/7 support</span>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Neon ticker */}
-      <div className="relative border-y border-border/60 bg-card/40 py-3">
-        <div className="marquee-track gap-8">
-          {[...TICKER, ...TICKER].map((t, i) => (
-            <span key={i} className="flex shrink-0 items-center gap-8 font-display text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
-              {t}
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            </span>
-          ))}
-        </div>
-      </div>
+          <div className="glass-panel p-6 lg:col-span-5">
+            <div className="flex items-center justify-between">
+              <div><p className="text-xs font-semibold uppercase text-muted-foreground">ISP network</p><h2 className="mt-1 text-xl font-bold">Five carriers. One core.</h2></div>
+              <Signal className="h-6 w-6 text-primary" />
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-3">
+              {ISPS.map((isp) => <IspLogo key={isp} isp={isp} className="h-14 w-full border border-border/60" imgClassName="max-h-8 max-w-[4.5rem]" />)}
+            </div>
+          </div>
 
-      {/* Feature grid */}
-      <section className="container mx-auto px-4 py-20">
-        <h2 className="text-center font-display text-3xl font-black uppercase tracking-tight md:text-4xl">
-          Everything you need. <span className="text-gradient">In one place.</span>
-        </h2>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="glass-panel grid grid-cols-2 divide-x divide-border/60 p-6 lg:col-span-5">
+            <div><p className="text-3xl font-bold text-foreground">99.9%</p><p className="mt-1 text-xs text-muted-foreground">Service uptime</p></div>
+            <div className="pl-6"><p className="text-3xl font-bold text-foreground">TLS</p><p className="mt-1 text-xs text-muted-foreground">Secure tunnel</p></div>
+          </div>
+
           {[
-            { icon: Zap, title: "Blazing fast", body: "Hand-picked low-latency servers tuned for Sri Lankan ISP packages." },
-            { icon: Lock, title: "Encrypted", body: "VLESS over TLS keeps your traffic private. No logs, no tracking." },
-            { icon: Globe, title: "ISP-aware", body: "Separate configs for Dialog, Hutch, Mobitel, SLT and Airtel packages." },
-          ].map((f) => (
-            <div key={f.title} className="neon-card group p-6">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-primary shadow-glow">
-                <f.icon className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h3 className="mt-5 font-display text-lg font-bold uppercase tracking-wide">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
+            { icon: Zap, title: "Blazing fast", body: "Low-latency servers tuned for Sri Lankan ISP packages.", span: "lg:col-span-4" },
+            { icon: Lock, title: "Encrypted", body: "VLESS over TLS keeps your traffic private and protected.", span: "lg:col-span-4" },
+            { icon: Globe, title: "ISP-aware", body: "Dedicated choices for every supported local carrier.", span: "lg:col-span-4" },
+          ].map((feature) => (
+            <div key={feature.title} className={`glass-panel bento-lift group p-6 ${feature.span}`}>
+              <div className="grid h-11 w-11 place-items-center rounded-md bg-primary/10 text-primary"><feature.icon className="h-5 w-5" /></div>
+              <h3 className="mt-5 text-lg font-bold">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{feature.body}</p>
             </div>
           ))}
-        </div>
-      </section>
 
-      {/* Service cards */}
-      <section className="container mx-auto px-4 pb-4">
-        <div className="grid gap-6 md:grid-cols-2">
           {[
-            { icon: Server, title: "V2Ray Services", sub: "Ultra-fast, reliable secure connections", to: "/v2ray", cta: "View plans" },
-            { icon: Wifi, title: "Free Configs", sub: "Fresh VLESS links for every ISP", to: "/configs", cta: "Browse free" },
-            { icon: ShieldCheck, title: "Setup Guides", sub: "Step-by-step for v2rayNG, NekoBox & more", to: "/setup", cta: "Learn setup" },
-            { icon: Gauge, title: "Premium Plans", sub: "100 GB / 200 GB / Unlimited monthly", to: "/plans", cta: "Get premium" },
-          ].map((c) => (
-            <div key={c.title} className="neon-card overflow-hidden p-6">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
-              <c.icon className="h-7 w-7 text-primary" />
-              <h3 className="mt-4 font-display text-xl font-bold uppercase tracking-wide">{c.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{c.sub}</p>
-              <Button variant="outline" size="sm" className="mt-6" asChild>
-                <Link to={c.to}>{c.cta} <ArrowRight className="ml-1 h-4 w-4" /></Link>
+            { icon: Server, title: "V2Ray Services", sub: "Reliable secure connections", to: "/v2ray", cta: "View plans" },
+            { icon: Wifi, title: "Free Configs", sub: "Fresh links for every ISP", to: "/configs", cta: "Browse free" },
+            { icon: ShieldCheck, title: "Setup Guides", sub: "Simple step-by-step help", to: "/setup", cta: "Learn setup" },
+            { icon: Gauge, title: "Premium Plans", sub: "100 GB to unlimited", to: "/plans", cta: "Get premium" },
+          ].map((service) => (
+            <div key={service.title} className="glass-panel bento-lift flex min-h-52 flex-col p-6 md:col-span-1 lg:col-span-3">
+              <service.icon className="h-6 w-6 text-primary" />
+              <h3 className="mt-7 text-lg font-bold">{service.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{service.sub}</p>
+              <Button variant="ghost" size="sm" className="mt-auto w-fit px-0 text-primary hover:bg-transparent" asChild>
+                <Link to={service.to}>{service.cta} <ArrowRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Paid plan strip */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="neon-card overflow-hidden p-8 md:p-12">
-          <div className="grid items-center gap-8 md:grid-cols-2">
-            <div>
-              <div className="inline-flex rounded-full bg-warning/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-warning-foreground">Premium</div>
-              <h2 className="mt-4 font-display text-3xl font-black uppercase md:text-4xl">Upgrade to coreVPN <span className="text-gradient">Pro</span></h2>
-              <p className="mt-3 text-muted-foreground">
-                Unlimited config downloads, priority new releases, exclusive premium-only configs and early access to beta tools.
-              </p>
-              <ul className="mt-6 space-y-2 text-sm">
-                {["Unlimited daily configs", "Premium-only ultra-fast servers", "Priority support", "Early access to new packages"].map((x) => (
-                  <li key={x} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />{x}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-border/60 bg-background/60 p-6">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground">From</div>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="font-display text-5xl font-black">LKR 200</span>
-                <span className="text-muted-foreground">/ month</span>
-              </div>
-              <Button size="lg" className="mt-6 w-full bg-gradient-primary text-primary-foreground shadow-glow" asChild>
-                <Link to="/plans">Get Paid Plan</Link>
-              </Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Basic 100 GB · Standard 200 GB · Premium unlimited — start now, pay within your deadline.
-              </p>
-            </div>
+      <section className="container mx-auto px-4 pb-20 pt-4">
+        <div className="glass-panel grid gap-8 overflow-hidden p-7 md:grid-cols-[1.35fr_0.65fr] md:p-10">
+          <div>
+            <span className="text-xs font-bold uppercase text-primary">coreVPN Premium</span>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">More data. Priority access.</h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">Choose 100 GB, 200 GB or unlimited access and receive your config after payment approval.</p>
+            <ul className="mt-6 grid gap-2 text-sm sm:grid-cols-2">
+              {["Dedicated premium config", "30-day access", "Priority support", "All supported ISPs"].map((item) => <li key={item} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" />{item}</li>)}
+            </ul>
+          </div>
+          <div className="border-t border-border/60 pt-6 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+            <p className="text-xs text-muted-foreground">Plans from</p>
+            <p className="mt-2 font-display text-4xl font-extrabold">LKR 200</p>
+            <p className="text-sm text-muted-foreground">per month</p>
+            <Button size="lg" className="mt-6 w-full bg-gradient-primary text-primary-foreground shadow-glow" asChild><Link to="/plans">Choose a Plan</Link></Button>
           </div>
         </div>
       </section>
