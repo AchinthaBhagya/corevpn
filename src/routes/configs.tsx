@@ -14,7 +14,7 @@ import { subscriptionStatus, daysLeft } from "@/lib/plans";
 
 export const Route = createFileRoute("/configs")({
   component: Configs,
-  head: () => ({ meta: [{ title: "Configs — coreVPN" }, { name: "description", content: "Browse free VLESS configs for Sri Lankan ISPs." }] }),
+  head: () => ({ meta: [{ title: "Configs — coreVPN" }, { name: "description", content: "Browse free VLESS configs for Sri Lankan ISPs." }, { property: "og:title", content: "Free VLESS Configs — coreVPN" }, { property: "og:description", content: "Browse VLESS configurations for Dialog, Hutch, Mobitel, SLT and Airtel." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
 });
 
 type Config = {

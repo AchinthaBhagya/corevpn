@@ -65,7 +65,7 @@ function Home() {
           </div>
 
           <div className="glass-panel grid grid-cols-2 divide-x divide-border/60 p-6 lg:col-span-5">
-            <div><p className="text-3xl font-bold text-foreground">99.9%</p><p className="mt-1 text-xs text-muted-foreground">Service uptime</p></div>
+            <div><p className="text-3xl font-bold text-foreground">05</p><p className="mt-1 text-xs text-muted-foreground">Supported ISPs</p></div>
             <div className="pl-6"><p className="text-3xl font-bold text-foreground">TLS</p><p className="mt-1 text-xs text-muted-foreground">Secure tunnel</p></div>
           </div>
 

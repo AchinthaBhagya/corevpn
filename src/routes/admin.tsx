@@ -23,7 +23,7 @@ import { formatLKR, subscriptionStatus, type Subscription, type PaymentRow } fro
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
-  head: () => ({ meta: [{ title: "Admin — coreVPN" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Admin — coreVPN" }, { name: "description", content: "Manage coreVPN configurations, customers and payments." }, { property: "og:title", content: "coreVPN administration" }, { property: "og:description", content: "Private coreVPN configuration and payment management." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" }] }),
 });
 
 type Config = {

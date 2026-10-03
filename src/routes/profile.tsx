@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
-  head: () => ({ meta: [{ title: "Profile — coreVPN" }] }),
+  head: () => ({ meta: [{ title: "Profile — coreVPN" }, { name: "description", content: "Manage your coreVPN account and review your plan." }, { property: "og:title", content: "Your coreVPN profile" }, { property: "og:description", content: "Manage your account details and plan on coreVPN." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" }] }),
 });
 
 function ProfilePage() {

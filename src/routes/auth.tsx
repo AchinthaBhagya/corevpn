@@ -16,7 +16,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     mode: s.mode === "register" ? ("register" as const) : ("login" as const),
   }),
-  head: () => ({ meta: [{ title: "Login or Register — coreVPN" }] }),
+  head: () => ({ meta: [{ title: "Login or Register — coreVPN" }, { name: "description", content: "Sign in or create your coreVPN account to access VLESS configs and plans." }, { property: "og:title", content: "Sign in to coreVPN" }, { property: "og:description", content: "Create an account or sign in to access your coreVPN configs." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
 });
 
 const loginSchema = z.object({

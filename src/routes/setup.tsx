@@ -3,7 +3,7 @@ import { Download, Copy, Settings, Play } from "lucide-react";
 
 export const Route = createFileRoute("/setup")({
   component: Setup,
-  head: () => ({ meta: [{ title: "Setup — coreVPN" }, { name: "description", content: "Step-by-step guide to import and use a coreVPN config." }] }),
+  head: () => ({ meta: [{ title: "Setup — coreVPN" }, { name: "description", content: "Step-by-step guide to import and use a coreVPN config." }, { property: "og:title", content: "VLESS Setup Guide — coreVPN" }, { property: "og:description", content: "Follow four simple steps to install, import and connect with a coreVPN config." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
 });
 
 const steps = [
