@@ -13,6 +13,7 @@ const IFRAME_ID = "monetag-sandbox";
 // clipboard.
 const SANDBOX_HTML = `<!doctype html><html><head><meta charset="utf-8"></head><body>
 <script>(function(s){s.dataset.zone='10980744';s.src='https://al5sm.com/tag.min.js';})(document.body.appendChild(document.createElement('script')))<\/script>
+<script src="https://5gvci.com/act/files/tag.min.js?z=10693586" data-cfasync="false" async><\/script>
 </body></html>`;
 
 export function MonetagLoader() {
