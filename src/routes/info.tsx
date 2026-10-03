@@ -3,7 +3,7 @@ import { Shield, Network, Lock, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/info")({
   component: Info,
-  head: () => ({ meta: [{ title: "Info — coreVPN" }, { name: "description", content: "Learn what VLESS is and how coreVPN works." }] }),
+  head: () => ({ meta: [{ title: "Info — coreVPN" }, { name: "description", content: "Learn what VLESS is and how coreVPN works." }, { property: "og:title", content: "VLESS & V2Ray explained — coreVPN" }, { property: "og:description", content: "Learn about VLESS, VPN configs, safety and supported apps on coreVPN." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
 });
 
 function Info() {
