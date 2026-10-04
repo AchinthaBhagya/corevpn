@@ -29,7 +29,7 @@ export function MonetagLoader() {
       "position:fixed;width:0;height:0;border:0;left:-9999px;top:-9999px;";
     frame.srcdoc = SANDBOX_HTML;
     document.body.appendChild(frame);
-  }, [pathname]);
+  }, []);
 
   return null;
 }
